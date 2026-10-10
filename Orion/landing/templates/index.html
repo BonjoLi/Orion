@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cosmos Home</title>
+<meta name="color-scheme" content="dark">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --ink:#eaf0ff;--muted:#9fb0d8;--glow:#8fb4ff;--panel:rgba(10,14,34,.88)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;height:100%;overflow:hidden;color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;
+  background:radial-gradient(ellipse at 20% 15%,#1b1f4d 0,transparent 55%),radial-gradient(ellipse at 85% 40%,#2a1245 0,transparent 50%),#05060f}
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+
+/* Logo */
+#logo{position:fixed;z-index:30;top:calc(14px + env(safe-area-inset-top,0px));left:14px;width:58px;height:58px;padding:0;border:0;border-radius:50%;
+  background:rgba(20,26,60,.6);cursor:pointer;filter:brightness(.7);transition:filter .3s,box-shadow .3s}
+#logo:hover{filter:brightness(.9)}
+#logo.on{filter:brightness(1.4) drop-shadow(0 0 8px var(--glow));box-shadow:0 0 22px rgba(143,180,255,.55)}
+#logo svg{width:100%;height:100%}
+#logo:focus-visible,.nav a:focus-visible,.btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
+
+/* Sidebar */
+#menu{position:fixed;z-index:20;top:0;left:0;bottom:0;width:250px;max-width:80vw;padding:calc(90px + env(safe-area-inset-top,0px)) 18px 24px;
+  background:var(--panel);border-right:1px solid rgba(143,180,255,.25);backdrop-filter:blur(8px);
+  transform:translateX(-102%);transition:transform .35s ease;visibility:hidden}
+#menu.open{transform:none;visibility:visible}
+.nav{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.nav a{display:block;padding:12px 14px;border-radius:10px;color:var(--ink);text-decoration:none;letter-spacing:.04em}
+.nav a:hover{background:rgba(143,180,255,.16)}
+.nav small{display:block;margin:0 0 10px 14px;color:var(--muted);letter-spacing:.2em;text-transform:uppercase;font-size:11px}
+
+/* Home buttons */
+main{position:relative;z-index:5;height:100%;display:flex;align-items:center;justify-content:center;padding:90px 20px 150px}
+h1{position:absolute;top:calc(26px + env(safe-area-inset-top,0px));left:0;right:0;text-align:center;margin:0;font-weight:300;letter-spacing:.35em;font-size:clamp(14px,2.2vw,22px);text-transform:uppercase;color:var(--muted);pointer-events:none}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(12px,3vw,40px);max-width:880px;width:100%}
+.btn{display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-size:clamp(12px,1.6vw,16px);letter-spacing:.12em;text-transform:uppercase;
+  animation:bob 6s ease-in-out infinite}
+.btn:nth-child(2){animation-delay:-1.5s}.btn:nth-child(3){animation-delay:-3s}.btn:nth-child(4){animation-delay:-4.5s}
+.btn svg{width:100%;max-width:150px;height:auto;overflow:visible;transition:transform .3s,filter .3s}
+.btn:hover svg,.btn:focus-visible svg{transform:scale(1.14);filter:drop-shadow(0 0 14px var(--glow))}
+@keyframes bob{50%{transform:translateY(-10px)}}
+@media(max-width:620px){.grid{grid-template-columns:repeat(2,1fr);gap:26px 12px;max-width:340px}}
+@media(prefers-reduced-motion:reduce){.btn,.wave{animation:none}}
+
+/* Horizon */
+.horizon{position:fixed;z-index:4;left:0;right:0;bottom:0;height:120px;pointer-events:none}
+.earth{position:absolute;left:50%;top:40px;width:190vw;height:190vw;transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(ellipse at 50% 0,#2f8f6a 0,#1b5f9a 14%,#0d2d66 40%,#050c24 70%);
+  box-shadow:0 -2px 3px rgba(190,230,255,.9),0 -8px 22px rgba(90,170,255,.8),0 -26px 60px rgba(60,120,255,.45)}
+.people{position:absolute;left:50%;bottom:77px;transform:translateX(-50%);width:210px;height:64px}
+.people svg{width:100%;height:100%;overflow:visible}
+.wave{transform-origin:0 0;animation:wave 1.4s ease-in-out infinite alternate}
+@keyframes wave{from{transform:rotate(-12deg)}to{transform:rotate(18deg)}}
+</style>
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<!-- Logo: replace the SVG with your own logo image/markup -->
+<button id="logo" aria-label="Toggle menu" aria-expanded="false" aria-controls="menu">
+  <svg viewBox="0 0 60 60" fill="none" stroke="#cfe0ff" stroke-width="2.5" stroke-linecap="round">
+    <circle cx="30" cy="30" r="9" fill="#cfe0ff" stroke="none"/>
+    <ellipse cx="30" cy="30" rx="22" ry="8" transform="rotate(-25 30 30)"/>
+    <circle cx="48" cy="21" r="2.5" fill="#cfe0ff" stroke="none"/>
+  </svg>
+</button>
+
+<nav id="menu" aria-label="Main menu">
+  <small>Navigate</small>
+  <ul class="nav">
+    <!-- Swap these hrefs for real pages later -->
+    <li><a href="#home">Home</a></li>
+    <li><a href="#moon">Moon</a></li>
+    <li><a href="#meteors">Meteors &amp; Comets</a></li>
+    <li><a href="#satellite">Satellites</a></li>
+    <li><a href="#clouds">Clouds</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+</nav>
+
+<h1>Welcome, Explorer</h1>
+
+<main>
+  <div class="grid">
+    <!-- Swap these hrefs for real pages later -->
+    <a class="btn" href="#moon" aria-label="Moon">
+      <svg viewBox="0 0 120 120"><defs><radialGradient id="mg" cx="35%" cy="30%"><stop offset="0" stop-color="#fffdf2"/><stop offset="1" stop-color="#a9a9b8"/></radialGradient></defs>
+        <circle cx="60" cy="60" r="48" fill="url(#mg)"/><circle cx="42" cy="46" r="9" fill="#8f8fa3" opacity=".6"/><circle cx="78" cy="68" r="12" fill="#8f8fa3" opacity=".55"/><circle cx="52" cy="82" r="6" fill="#8f8fa3" opacity=".6"/><circle cx="82" cy="40" r="5" fill="#8f8fa3" opacity=".5"/></svg>
+      <span>Moon</span></a>
+
+    <a class="btn" href="#meteors" aria-label="Meteors and comets">
+      <svg viewBox="0 0 120 120"><defs><linearGradient id="tg" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffb347"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></linearGradient>
+        <linearGradient id="tg2" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#9fd4ff"/><stop offset="1" stop-color="#9fd4ff" stop-opacity="0"/></linearGradient></defs>
+        <path d="M92 28 L10 92 L18 100 Z" fill="url(#tg)" transform="translate(6,-4)"/><circle cx="98" cy="22" r="11" fill="#ffd38a"/>
+        <path d="M110 62 L52 108 L58 112 Z" fill="url(#tg2)" opacity=".85"/><circle cx="108" cy="62" r="6" fill="#d7edff"/></svg>
+      <span>Meteors</span></a>
+
+    <a class="btn" href="#satellite" aria-label="Satellite">
+      <svg viewBox="0 0 120 120" transform="rotate(-20)"><rect x="6" y="46" width="34" height="28" rx="2" fill="#2f5fd0" stroke="#cfe0ff" stroke-width="2"/><rect x="80" y="46" width="34" height="28" rx="2" fill="#2f5fd0" stroke="#cfe0ff" stroke-width="2"/>
+        <path d="M23 46v28M14 46v28M32 46v28M97 46v28M88 46v28M106 46v28" stroke="#cfe0ff" stroke-width="1" opacity=".7"/><path d="M40 60h12M68 60h12" stroke="#cfe0ff" stroke-width="3"/>
+        <rect x="50" y="46" width="20" height="28" rx="4" fill="#d9dde8" stroke="#fff" stroke-width="2"/><circle cx="60" cy="60" r="5" fill="#35406b"/><path d="M60 46V34" stroke="#cfe0ff" stroke-width="2"/><circle cx="60" cy="31" r="4" fill="#ff7a7a"/></svg>
+      <span>Satellite</span></a>
+
+    <a class="btn" href="#clouds" aria-label="Clouds">
+      <svg viewBox="0 0 120 120"><defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9c8ea"/></linearGradient></defs>
+        <path d="M34 90a22 22 0 0 1-2-44 28 28 0 0 1 52-6 24 24 0 0 1 6 50z" fill="url(#cg)"/></svg>
+      <span>Clouds</span></a>
+  </div>
+</main>
+
+<div class="horizon" aria-hidden="true">
+  <div class="earth"></div>
+  <div class="people">
+    <svg viewBox="0 0 210 64" fill="none" stroke="#f2f6ff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <g transform="translate(30,0)"><circle cx="0" cy="12" r="6"/><path d="M0 18v22M0 40l-7 22M0 40l7 22M0 26l-10 12M0 26l10 12"/></g>
+      <g transform="translate(78,6)"><circle cx="0" cy="12" r="5"/><path d="M0 17v19M0 36l-6 20M0 36l6 20M0 24l-9 10M0 24l9 10"/></g>
+      <g transform="translate(128,0)"><circle cx="0" cy="12" r="6"/><path d="M0 18v22M0 40l-7 22M0 40l7 22M0 26l-10 12"/><g class="wave"><path d="M0 26l12 -10"/></g></g>
+      <g transform="translate(176,10)"><circle cx="0" cy="12" r="4.5"/><path d="M0 16.5v16M0 32.5l-5 16M0 32.5l5 16M0 22l-8 9M0 22l8 9"/></g>
+    </svg>
+  </div>
+</div>
+
+<script>
+// Menu toggle
+const logo=document.getElementById('logo'),menu=document.getElementById('menu');
+function setMenu(o){menu.classList.toggle('open',o);logo.classList.toggle('on',o);logo.setAttribute('aria-expanded',o)}
+logo.addEventListener('click',()=>setMenu(!menu.classList.contains('open')));
+addEventListener('keydown',e=>{if(e.key==='Escape')setMenu(false)});
+
+// Twinkling starfield
+const c=document.getElementById('stars'),x=c.getContext('2d');let S=[];
+function init(){const d=devicePixelRatio||1;c.width=innerWidth*d;c.height=innerHeight*d;x.setTransform(d,0,0,d,0,0);
+  S=Array.from({length:Math.min(260,Math.floor(innerWidth*innerHeight/5000))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.3+.2,p:Math.random()*6.3,s:Math.random()*1.5+.4}))}
+function draw(t){x.clearRect(0,0,innerWidth,innerHeight);
+  for(const s of S){x.globalAlpha=.35+.65*Math.abs(Math.sin(t/1000*s.s+s.p));x.fillStyle='#fff';x.beginPath();x.arc(s.x,s.y,s.r,0,6.3);x.fill()}
+  if(!matchMedia('(prefers-reduced-motion:reduce)').matches)requestAnimationFrame(draw)}
+addEventListener('resize',init);init();requestAnimationFrame(draw);
+</script>
+</body>
+</html>
