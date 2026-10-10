@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+:root {
+  --bg: #05070f;
+  --fg: #e6e9f2;
+  --muted: #8a93a8;
+  --accent: #7dd3fc;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* TODO(landing owner): theme/colors/fonts live here. */

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "orionids-2026",
+    "name": "Orionids",
+    "peak": "2026-10-22T00:00:00Z",
+    "windowStart": "2026-10-21T00:00:00Z",
+    "windowEnd": "2026-10-23T12:00:00Z",
+    "radiant": { "raHours": 6.33, "decDeg": 16 },
+    "zhr": 20,
+    "description": "Debris from Halley's Comet. Radiant rises late evening; best after midnight.",
+    "source": "https://earthsky.org/astronomy-essentials/earthskys-meteor-shower-guide/"
+  },
+  {
+    "id": "leonids-2026",
+    "name": "Leonids",
+    "peak": "2026-11-18T00:00:00Z",
+    "windowStart": "2026-11-17T00:00:00Z",
+    "windowEnd": "2026-11-19T12:00:00Z",
+    "radiant": { "raHours": 10.13, "decDeg": 22 },
+    "zhr": 15,
+    "description": "Fast meteors from Comet Tempel-Tuttle.",
+    "source": "https://earthsky.org/astronomy-essentials/earthskys-meteor-shower-guide/"
+  },
+  {
+    "id": "geminids-2026",
+    "name": "Geminids",
+    "peak": "2026-12-14T00:00:00Z",
+    "windowStart": "2026-12-13T00:00:00Z",
+    "windowEnd": "2026-12-15T12:00:00Z",
+    "radiant": { "raHours": 7.47, "decDeg": 32 },
+    "zhr": 150,
+    "description": "The strongest annual shower. Radiant is up most of the night.",
+    "source": "https://earthsky.org/astronomy-essentials/earthskys-meteor-shower-guide/"
+  },
+  {
+    "id": "ursids-2026",
+    "name": "Ursids",
+    "peak": "2026-12-22T20:59:00Z",
+    "windowStart": "2026-12-22T00:00:00Z",
+    "windowEnd": "2026-12-23T12:00:00Z",
+    "radiant": { "raHours": 14.47, "decDeg": 76 },
+    "zhr": 10,
+    "description": "Minor shower near the Little Dipper.",
+    "source": "https://earthsky.org/astronomy-essentials/earthskys-meteor-shower-guide/"
+  },
+  {
+    "id": "quadrantids-2027",
+    "name": "Quadrantids",
+    "peak": "2027-01-03T12:00:00Z",
+    "windowStart": "2027-01-03T00:00:00Z",
+    "windowEnd": "2027-01-04T12:00:00Z",
+    "radiant": { "raHours": 15.3, "decDeg": 49 },
+    "zhr": 120,
+    "description": "Sharp peak lasting only a few hours.",
+    "source": "https://earthsky.org/astronomy-essentials/earthskys-meteor-shower-guide/"
+  },
+  {
+    "id": "lyrids-2027",
+    "name": "Lyrids",
+    "peak": "2027-04-22T12:00:00Z",
+    "windowStart": "2027-04-22T00:00:00Z",
+    "windowEnd": "2027-04-23T12:00:00Z",
+    "radiant": { "raHours": 18.13, "decDeg": 34 },
+    "zhr": 18,
+    "description": "Oldest recorded shower.",
+    "source": "https://earthsky.org/astronomy-essentials/earthskys-meteor-shower-guide/"
+  },
+  {
+    "id": "eta-aquariids-2027",
+    "name": "Eta Aquariids",
+    "peak": "2027-05-06T00:00:00Z",
+    "windowStart": "2027-05-05T00:00:00Z",
+    "windowEnd": "2027-05-07T12:00:00Z",
+    "radiant": { "raHours": 22.5, "decDeg": -1 },
+    "zhr": 50,
+    "description": "Second Halley shower; best before dawn, favors the south.",
+    "source": "https://earthsky.org/astronomy-essentials/earthskys-meteor-shower-guide/"
+  },
+  {
+    "id": "perseids-2027",
+    "name": "Perseids",
+    "peak": "2027-08-13T00:00:00Z",
+    "windowStart": "2027-08-12T00:00:00Z",
+    "windowEnd": "2027-08-14T12:00:00Z",
+    "radiant": { "raHours": 3.2, "decDeg": 58 },
+    "zhr": 100,
+    "description": "The summer favorite.",
+    "source": "https://earthsky.org/astronomy-essentials/earthskys-meteor-shower-guide/"
+  }
+]

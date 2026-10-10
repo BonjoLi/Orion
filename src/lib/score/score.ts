@@ -1,0 +1,146 @@
+import type { Feature, FeatureCollection, Point } from "geojson";
+import { altitudeOf, moonAltitude, moonIllumination, sunAltitude } from "@/lib/astro/sky";
+import { buildGrid } from "@/lib/score/grid";
+import type { Cell, CellScore, HourScore, LatLon, ScoreResponse, SkyEvent } from "@/lib/types";
+import { fetchForecasts } from "@/lib/weather/openMeteo";
+
+// ---------------------------------------------------------------------------
+// Deterministic viewing-condition score. This is the ground truth; the AI
+// plan is only allowed to quote numbers from here.
+//
+//   score = 100 · clear · dark · (1 − moonPenalty) · targetUp · darkSky
+//
+// WEIGHTS are a starting proposal (precedent: the AstroWeather Home Assistant
+// integration weights cloud×3 over seeing×2 over transparency×1). Tune by eye.
+// ---------------------------------------------------------------------------
+
+export const WEIGHTS = {
+  cloudLow: 1.0,
+  cloudMid: 0.8,
+  cloudHigh: 0.5,
+  /** Sun altitude thresholds (deg): astronomical / nautical twilight. */
+  astroTwilight: -18,
+  nauticalTwilight: -12,
+  /** Moon penalty ramps from 0 at moonAlt=-5° to full at +25°. */
+  moonAltFloor: -5,
+  moonAltRamp: 30,
+  /** Target (radiant/ISS) usefulness ramps from 10° to 30° altitude. */
+  targetAltFloor: 10,
+  targetAltRamp: 20,
+} as const;
+
+export function clamp01(x: number): number {
+  return Math.max(0, Math.min(1, x));
+}
+
+/** Light-pollution hook. Returns 1 until a numeric sky-brightness source is wired. */
+export function darkSkyFactor(_cell: Cell): number {
+  // TODO(data owner): sample World Atlas 2015 (Falchi et al. 2016, CC BY-NC) or
+  // VIIRS radiance and map to 0.3..1. See README "Light pollution".
+  return 1;
+}
+
+export function scoreHour(
+  cell: Cell,
+  event: SkyEvent,
+  at: Date,
+  w: { cloudLow: number; cloudMid: number; cloudHigh: number; precipitation: number },
+): HourScore {
+  const p: LatLon = { lat: cell.lat, lon: cell.lon };
+  const sunAlt = sunAltitude(p, at);
+  const moonAlt = moonAltitude(p, at);
+  const moonIllum = moonIllumination(at);
+
+  const clear = 1 - clamp01((WEIGHTS.cloudLow * w.cloudLow + WEIGHTS.cloudMid * w.cloudMid + WEIGHTS.cloudHigh * w.cloudHigh) / 100);
+  const dark = sunAlt < WEIGHTS.astroTwilight ? 1 : sunAlt < WEIGHTS.nauticalTwilight ? 0.5 : 0;
+  const moonPenalty = moonIllum * clamp01((moonAlt - WEIGHTS.moonAltFloor) / WEIGHTS.moonAltRamp);
+
+  let targetAlt: number | null = null;
+  let targetUp = 1;
+  if (event.target) {
+    targetAlt = altitudeOf(p, at, event.target.ra, event.target.dec);
+    targetUp = clamp01((targetAlt - WEIGHTS.targetAltFloor) / WEIGHTS.targetAltRamp);
+  }
+  // Solar eclipses happen in daylight: darkness is irrelevant, path membership is everything.
+  const darkTerm = event.kind === "solar_eclipse" ? 1 : dark;
+  const moonTerm = event.kind === "solar_eclipse" ? 1 : 1 - moonPenalty;
+
+  const raw = w.precipitation > 0 ? 0 : 100 * clear * darkTerm * moonTerm * targetUp * darkSkyFactor(cell);
+
+  return {
+    hour: at.toISOString(),
+    score: Math.round(raw),
+    clear: round2(clear),
+    dark: darkTerm,
+    moonPenalty: round2(moonPenalty),
+    targetUp: round2(targetUp),
+    cloudLow: w.cloudLow,
+    cloudMid: w.cloudMid,
+    cloudHigh: w.cloudHigh,
+    precipitation: w.precipitation,
+    sunAlt: round2(sunAlt),
+    moonAlt: round2(moonAlt),
+    moonIllum: round2(moonIllum),
+    targetAlt: targetAlt === null ? null : round2(targetAlt),
+  };
+}
+
+/** Hours (top of hour, UTC) inside the event window, capped so the map stays cheap. */
+export function windowHours(event: SkyEvent, maxHours = 48): Date[] {
+  const start = new Date(event.windowStart);
+  start.setUTCMinutes(0, 0, 0);
+  const end = new Date(event.windowEnd);
+  const hours: Date[] = [];
+  for (let t = start.getTime(); t <= end.getTime() && hours.length < maxHours; t += 3600 * 1000) {
+    hours.push(new Date(t));
+  }
+  return hours;
+}
+
+export async function scoreEvent(event: SkyEvent, origin: LatLon, radiusKm: number): Promise<ScoreResponse> {
+  const cells = buildGrid(origin, radiusKm);
+  const hours = windowHours(event);
+  const daysAhead = Math.ceil((hours[hours.length - 1].getTime() - Date.now()) / (24 * 3600 * 1000)) + 1;
+  const forecasts = await fetchForecasts(cells, Math.min(16, Math.max(1, daysAhead)));
+
+  const cellScores: CellScore[] = cells.map((cell, i) => {
+    const byHour = new Map(forecasts[i]?.hourly.map((h) => [h.time, h]) ?? []);
+    const hourScores = hours.map((at) => {
+      const w = byHour.get(at.toISOString()) ?? { cloudLow: 100, cloudMid: 100, cloudHigh: 100, precipitation: 0 };
+      return scoreHour(cell, event, at, w);
+    });
+    const best = hourScores.reduce((a, b) => (b.score > a.score ? b : a), hourScores[0]);
+    return { cell, bestHour: best.hour, bestScore: best.score, hours: hourScores };
+  });
+  cellScores.sort((a, b) => b.bestScore - a.bestScore);
+
+  return {
+    event,
+    origin,
+    radiusKm,
+    computedAt: new Date().toISOString(),
+    hours: hours.map((h) => h.toISOString()),
+    cells: cellScores,
+    geojson: toGeoJSON(cellScores),
+  };
+}
+
+export function toGeoJSON(cells: CellScore[]): FeatureCollection<Point> {
+  const features: Feature<Point>[] = cells.map((c) => ({
+    type: "Feature",
+    geometry: { type: "Point", coordinates: [c.cell.lon, c.cell.lat] },
+    properties: {
+      id: c.cell.id,
+      score: c.bestScore,
+      bestHour: c.bestHour,
+      distanceKm: c.cell.distanceKm,
+      // per-hour scores so the slider can switch without a refetch
+      byHour: Object.fromEntries(c.hours.map((h) => [h.hour, h.score])),
+    },
+  }));
+  return { type: "FeatureCollection", features };
+}
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
