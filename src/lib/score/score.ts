@@ -1,7 +1,7 @@
 import type { Feature, FeatureCollection, Point } from "geojson";
 import { altitudeOf, moonAltitude, moonIllumination, sunAltitude } from "@/lib/astro/sky";
 import { buildGrid } from "@/lib/score/grid";
-import type { Cell, CellScore, HourScore, LatLon, ScoreResponse, SkyEvent } from "@/lib/types";
+import type { Cell, CellScore, HourScore, LatLon, ScorePoint, ScoreResponse, SkyEvent } from "@/lib/types";
 import { fetchForecasts } from "@/lib/weather/openMeteo";
 
 // ---------------------------------------------------------------------------
@@ -122,7 +122,21 @@ export async function scoreEvent(event: SkyEvent, origin: LatLon, radiusKm: numb
     hours: hours.map((h) => h.toISOString()),
     cells: cellScores,
     geojson: toGeoJSON(cellScores),
+    points: toPoints(cellScores),
   };
+}
+
+/** Flat points for the deck.gl heatmap. */
+export function toPoints(cells: CellScore[]): ScorePoint[] {
+  return cells.map((c) => ({
+    id: c.cell.id,
+    lon: c.cell.lon,
+    lat: c.cell.lat,
+    score: c.bestScore,
+    bestHour: c.bestHour,
+    distanceKm: c.cell.distanceKm,
+    byHour: Object.fromEntries(c.hours.map((h) => [h.hour, h.score])),
+  }));
 }
 
 export function toGeoJSON(cells: CellScore[]): FeatureCollection<Point> {

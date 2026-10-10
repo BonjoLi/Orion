@@ -70,14 +70,45 @@ export const CellScore = z.object({
 });
 export type CellScore = z.infer<typeof CellScore>;
 
+/** Map viewport in degrees. */
+export const Bounds = z.object({
+  north: z.number().min(-90).max(90),
+  south: z.number().min(-90).max(90),
+  east: z.number().min(-180).max(180),
+  west: z.number().min(-180).max(180),
+});
+export type Bounds = z.infer<typeof Bounds>;
+
 export const ScoreRequest = z.object({
   eventId: z.string(),
+  /** Where the user is. Used for distance and as the fallback region center. */
   origin: LatLon,
+  /** Radius mode (legacy /map-legacy page). Ignored when `bounds` is given. */
   radiusKm: z.number().min(10).max(1000).default(150),
+  /**
+   * Viewport mode (Google map page): score the cells inside these bounds.
+   * The server caps the region (see REGION_CAP in score/bounds.ts) and
+   * responds 413 if the bounds are wider than the cap.
+   */
+  bounds: Bounds.optional(),
   /** Optional override of the event window start, ISO date or datetime. */
   date: z.string().optional(),
 });
 export type ScoreRequest = z.infer<typeof ScoreRequest>;
+
+/** Flat point for the deck.gl heatmap: one per cell. */
+export const ScorePoint = z.object({
+  id: z.string(),
+  lon: z.number(),
+  lat: z.number(),
+  /** Best score in the event window, 0–100. */
+  score: z.number(),
+  bestHour: z.string(),
+  distanceKm: z.number(),
+  /** Score at each hour of the window, keyed by ISO hour. */
+  byHour: z.record(z.string(), z.number()),
+});
+export type ScorePoint = z.infer<typeof ScorePoint>;
 
 export const ScoreResponse = z.object({
   event: SkyEvent,
@@ -87,8 +118,14 @@ export const ScoreResponse = z.object({
   hours: z.array(z.string()),
   /** All cells, sorted by bestScore desc. */
   cells: z.array(CellScore),
-  /** GeoJSON FeatureCollection for the heatmap layer. */
+  /** GeoJSON FeatureCollection (legacy MapLibre heatmap). */
   geojson: z.any(),
+  /** Flat points for the deck.gl heatmap (same data as `cells`). */
+  points: z.array(ScorePoint),
+  /** The bounds actually scored (snapped to the grid), when in viewport mode. */
+  bounds: Bounds.optional(),
+  /** Grid spacing in degrees that was used. */
+  stepDeg: z.number().optional(),
 });
 export type ScoreResponse = z.infer<typeof ScoreResponse>;
 
