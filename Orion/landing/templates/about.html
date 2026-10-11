@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>About — Orion</title>
+    <meta name="color-scheme" content="dark">
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <style>
+        :root {
+            --ink: #e8eef7;
+            --muted: #8391a7;
+            --panel: rgba(9, 14, 26, .94);
+            --line: rgba(255, 255, 255, .07);
+            --card: rgba(22, 29, 52, .55);
+            --accent: #a9c6ff;
+            --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100%;
+            color: var(--ink);
+            font-family: var(--sans);
+            background: linear-gradient(180deg, #04060d 0%, #070d1c 30%, #0a1530 58%, #0f2050 80%, #16336a 100%);
+        }
+
+        #stars {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 14px 20px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--line);
+            backdrop-filter: blur(8px);
+        }
+
+        .topbar .back {
+            color: var(--ink);
+            text-decoration: none;
+            font-size: 12px;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+        }
+
+        .topbar .back:hover,
+        .topbar .back:focus-visible {
+            color: #fff;
+        }
+
+        .topbar .wordmark {
+            font-weight: 300;
+            letter-spacing: .18em;
+            margin-right: -.18em;
+            color: #f2f6fc;
+        }
+
+        main {
+            position: relative;
+            z-index: 5;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 48px 24px 96px;
+        }
+
+        .eyebrow {
+            margin: 0 0 12px;
+            font-size: 12px;
+            letter-spacing: .3em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(30px, 6vw, 52px);
+            font-weight: 300;
+            line-height: 1.1;
+            letter-spacing: .02em;
+        }
+
+        .lead {
+            margin: 20px 0 0;
+            font-size: 17px;
+            line-height: 1.6;
+            color: var(--muted);
+            max-width: 46em;
+        }
+
+        section {
+            margin-top: 56px;
+        }
+
+        h2 {
+            margin: 0 0 18px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .card {
+            padding: 18px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+
+        .card .kicker {
+            margin: 0 0 8px;
+            font-size: 11px;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        .card h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card p {
+            margin: 8px 0 0;
+            font-size: 14px;
+            line-height: 1.55;
+            color: var(--muted);
+        }
+        .steps {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            counter-reset: step;
+            display: grid;
+            gap: 14px;
+        }
+
+        .steps li {
+            counter-increment: step;
+            position: relative;
+            padding: 18px 18px 18px 64px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+
+        .steps li::before {
+            content: counter(step, decimal-leading-zero);
+            position: absolute;
+            left: 18px;
+            top: 18px;
+            font-size: 22px;
+            font-weight: 300;
+            color: rgba(169, 198, 255, .7);
+        }
+
+        .steps h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .steps p {
+            margin: 8px 0 0;
+            font-size: 14px;
+            line-height: 1.55;
+            color: var(--muted);
+        }
+
+        .team {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+
+        .member {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+
+        .member .avatar {
+            width: 46px;
+            height: 46px;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .08);
+            animation: pulse 1.6s ease-in-out infinite;
+        }
+
+        .member .name {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .member .role {
+            margin: 2px 0 0;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: .45; }
+            50% { opacity: 1; }
+        }
+
+        .credits {
+            margin: 18px 0 0;
+            padding: 0 0 0 20px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="stars" aria-hidden="true"></canvas>
+
+    <div class="topbar">
+        <a class="back" href="index.html">← Back</a>
+        <span class="wordmark">ORION</span>
+    </div>
+
+    <main>
+        <p class="eyebrow">About</p>
+        <h1>Placeholder — what Orion is for.</h1>
+        <p class="lead">
+            Placeholder — one paragraph on why we built Orion. Pick a sky event, see where the sky
+            will be clear and dark, and get a plan before you drive.
+        </p>
+
+        <section>
+            <h2>What we do</h2>
+            <div class="grid">
+                <div class="card">
+                    <p class="kicker">Feature one</p>
+                    <h3>Placeholder title</h3>
+                    <p>Placeholder — short line describing this and what it unlocks.</p>
+                </div>
+                <div class="card">
+                    <p class="kicker">Feature two</p>
+                    <h3>Placeholder title</h3>
+                    <p>Placeholder — short line describing this and what it unlocks.</p>
+                </div>
+                <div class="card">
+                    <p class="kicker">Feature three</p>
+                    <h3>Placeholder title</h3>
+                    <p>Placeholder — short line describing this and what it unlocks.</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>How it works</h2>
+            <ol class="steps">
+                <li>
+                    <h3>Pick an event</h3>
+                    <p>Placeholder — explain this step in a sentence or two.</p>
+                </li>
+                <li>
+                    <h3>See the heatmap</h3>
+                    <p>Placeholder — explain this step in a sentence or two.</p>
+                </li>
+                <li>
+                    <h3>Get a plan</h3>
+                    <p>Placeholder — explain this step in a sentence or two.</p>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>The team</h2>
+            <div class="team">
+                <div class="member">
+                    <span class="avatar" aria-hidden="true"></span>
+                    <div>
+                        <p class="name">Placeholder name</p>
+                        <p class="role">Placeholder role</p>
+                    </div>
+                </div>
+                <div class="member">
+                    <span class="avatar" aria-hidden="true"></span>
+                    <div>
+                        <p class="name">Placeholder name</p>
+                        <p class="role">Placeholder role</p>
+                    </div>
+                </div>
+                <div class="member">
+                    <span class="avatar" aria-hidden="true"></span>
+                    <div>
+                        <p class="name">Placeholder name</p>
+                        <p class="role">Placeholder role</p>
+                    </div>
+                </div>
+                <div class="member">
+                    <span class="avatar" aria-hidden="true"></span>
+                    <div>
+                        <p class="name">Placeholder name</p>
+                        <p class="role">Placeholder role</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Data &amp; credits</h2>
+            <p class="lead">
+                Placeholder — list the data sources and people behind Orion: weather, orbits, eclipses,
+                night lights, and the map.
+            </p>
+            <ul class="credits">
+                <li>Placeholder — source one</li>
+                <li>Placeholder — source two</li>
+                <li>Placeholder — source three</li>
+            </ul>
+        </section>
+    </main>
+
+    <script>
+        // Static starfield, matching the landing page.
+        const canvas = document.getElementById('stars'), ctx = canvas.getContext('2d');
+        function drawStars() {
+            const dpr = devicePixelRatio || 1;
+            canvas.width = innerWidth * dpr;
+            canvas.height = innerHeight * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+            const count = Math.min(160, Math.floor(innerWidth * innerHeight / 7000));
+            for (let i = 0; i < count; i++) {
+                ctx.globalAlpha = 0.15 + Math.random() * 0.6;
+                ctx.fillStyle = '#c9d5e8';
+                ctx.beginPath();
+                ctx.arc(Math.random() * innerWidth, Math.random() * innerHeight, Math.random() * 1.1 + 0.2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        addEventListener('resize', drawStars);
+        drawStars();
+    </script>
+</body>
+
+</html>
