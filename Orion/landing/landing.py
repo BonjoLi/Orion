@@ -14,6 +14,15 @@ landing_bp = Blueprint(
 def root():
     return redirect(url_for("auth.sign_in"))
 
-@landing_bp.route("/landing")
+@landing_bp.route("/home")
 def home():
-    return redirect(url_for("landing.index"), code=302)
+    return render_template("index.html")
+
+@landing_bp.route("/sign-in")
+def sign_in():
+    return redirect(url_for("auth.sign_in"))
+
+@landing_bp.route("/about")
+def about():
+    return render_template("about.html")
+# TO BE IMPLENTED: PROFILE PAGE
