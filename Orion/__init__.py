@@ -5,6 +5,7 @@ import os
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import inspect
 
 db = SQLAlchemy()
 
@@ -29,6 +30,11 @@ def create_app(config_object: object | None = None) -> Flask:
         app.config.from_object(config_object)
 
     db.init_app(app)
+
+    print("Configured database URI:", app.config["SQLALCHEMY_DATABASE_URI"])
+    with app.app_context():
+        print("Web app database:", db.engine.url)
+        print("Web app tables:", db.inspect(db.engine).get_table_names())
 
     from .auth.userModel import User
 

@@ -3,7 +3,7 @@ from urllib.parse import urlsplit
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
-from sqlalchemy import func
+from sqlalchemy import func, inspect
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -71,6 +71,8 @@ def sign_in():
 
 @auth_bp.route("/sign-up", methods=["GET", "POST"])
 def sign_up():
+    
+    
     if current_user.is_authenticated:
         return redirect(url_for("auth.profile"))
 
@@ -88,6 +90,11 @@ def sign_up():
         else:
             problem = password_problem(password, confirm)
         if not problem:
+            from sqlalchemy import inspect
+
+            print("Sign-up database:", db.engine.url)
+            print("Sign-up tables:", inspect(db.engine).get_table_names())
+            
             if User.query.filter(func.lower(User.email) == email).first():
                 problem = "An account with that email already exists."
             elif User.query.filter(func.lower(User.username) == username.lower()).first():
