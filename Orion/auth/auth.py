@@ -14,7 +14,7 @@ auth_bp = Blueprint(
 )
 
 
-@auth_bp.route("/sign-in", methods=["GET", "POST"])
+@auth_bp.route("/login", methods=["GET", "POST"])
 def sign_in():
     if request.method == "POST":
         email = request.form.get("email", "").strip()
@@ -28,7 +28,7 @@ def sign_in():
 
         flash("Login unsuccessful. Please check your email and password.", "error")
 
-    return render_template("sign_in.html")
+    return render_template("login.html")
 
 @auth_bp.route("/sign-up", methods=["GET", "POST"])
 def sign_up():
@@ -62,8 +62,8 @@ def sign_up():
 
             return redirect(url_for("auth.sign_in"))
 
-    return render_template("sign_up.html")
+    return render_template("signup.html")
 
 @auth_bp.route("/profile")
 def profile():
-    return render_template("profile.html", user=current_user)
+    return render_template("account.html", user=current_user)
