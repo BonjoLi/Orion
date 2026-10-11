@@ -41,8 +41,8 @@ const LEADERBOARD: Entry[] = [
   { rank: 1, handle: "AndromedaAva", points: 1240 },
   { rank: 2, handle: "NovaNate", points: 980 },
   { rank: 3, handle: "PolarisPri", points: 875 },
-  { rank: 4, handle: "You", points: 640, you: true },
-  { rank: 5, handle: "GalileoGus", points: 512 },
+  { rank: 4, handle: "GalileoGus", points: 512 },
+  { rank: 5, handle: "You", points: 0, you: true },
 ];
 
 const REPLAYS: Replay[] = [
