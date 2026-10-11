@@ -204,29 +204,9 @@
             border-radius: 12px;
         }
 
-        .member .avatar {
-            width: 46px;
-            height: 46px;
-            flex: 0 0 auto;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, .08);
-            animation: pulse 1.6s ease-in-out infinite;
-        }
-
         .member .name {
             margin: 0;
             font-weight: 600;
-        }
-
-        .member .role {
-            margin: 2px 0 0;
-            font-size: 13px;
-            color: var(--muted);
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: .45; }
-            50% { opacity: 1; }
         }
 
         .credits {
@@ -249,29 +229,31 @@
 
     <main>
         <p class="eyebrow">About</p>
-        <h1>Placeholder — what Orion is for.</h1>
+        <h1>Find the best spot to watch the sky, and bring your friends.</h1>
         <p class="lead">
-            Placeholder — one paragraph on why we built Orion. Pick a sky event, see where the sky
-            will be clear and dark, and get a plan before you drive.
+            Orion is an astronomical event tracker and weather tracker in one. A great eclipse, meteor
+            shower or satellite pass is only worth the drive if you can actually see it, so Orion shows
+            where the event is visible and where the weather will cooperate. Then it helps you plan the
+            trip with other people and see who can catch the most.
         </p>
 
         <section>
             <h2>What we do</h2>
             <div class="grid">
                 <div class="card">
-                    <p class="kicker">Feature one</p>
-                    <h3>Placeholder title</h3>
-                    <p>Placeholder — short line describing this and what it unlocks.</p>
+                    <p class="kicker">Live heatmap</p>
+                    <h3>See where it's actually visible</h3>
+                    <p>A heatmap combines where each event can be seen with live weather conditions, with AI working on real-time data to point you to the best spots.</p>
                 </div>
                 <div class="card">
-                    <p class="kicker">Feature two</p>
-                    <h3>Placeholder title</h3>
-                    <p>Placeholder — short line describing this and what it unlocks.</p>
+                    <p class="kicker">Event tracker</p>
+                    <h3>Past, present and future</h3>
+                    <p>Browse a database of past events, follow the ones happening now, and look ahead to predictions for events still to come.</p>
                 </div>
                 <div class="card">
-                    <p class="kicker">Feature three</p>
-                    <h3>Placeholder title</h3>
-                    <p>Placeholder — short line describing this and what it unlocks.</p>
+                    <p class="kicker">Community</p>
+                    <h3>Compete and plan together</h3>
+                    <p>Add friends, earn points for seeing events and livestreaming them, climb the leaderboard, and connect with others to plan trips.</p>
                 </div>
             </div>
         </section>
@@ -281,15 +263,15 @@
             <ol class="steps">
                 <li>
                     <h3>Pick an event</h3>
-                    <p>Placeholder — explain this step in a sentence or two.</p>
+                    <p>Choose something happening now or coming up, or dig into the archive of past events.</p>
                 </li>
                 <li>
                     <h3>See the heatmap</h3>
-                    <p>Placeholder — explain this step in a sentence or two.</p>
+                    <p>Visibility and live weather are combined into one map, so the best places to watch stand out at a glance.</p>
                 </li>
                 <li>
-                    <h3>Get a plan</h3>
-                    <p>Placeholder — explain this step in a sentence or two.</p>
+                    <h3>Plan the trip, then see it</h3>
+                    <p>Invite friends or connect with other skywatchers, head out together, and earn points for seeing the event and livestreaming it.</p>
                 </li>
             </ol>
         </section>
@@ -298,32 +280,16 @@
             <h2>The team</h2>
             <div class="team">
                 <div class="member">
-                    <span class="avatar" aria-hidden="true"></span>
-                    <div>
-                        <p class="name">Placeholder name</p>
-                        <p class="role">Placeholder role</p>
-                    </div>
+                    <p class="name">Matthew Ocampo</p>
                 </div>
                 <div class="member">
-                    <span class="avatar" aria-hidden="true"></span>
-                    <div>
-                        <p class="name">Placeholder name</p>
-                        <p class="role">Placeholder role</p>
-                    </div>
+                    <p class="name">Michael Adasofunjo</p>
                 </div>
                 <div class="member">
-                    <span class="avatar" aria-hidden="true"></span>
-                    <div>
-                        <p class="name">Placeholder name</p>
-                        <p class="role">Placeholder role</p>
-                    </div>
+                    <p class="name">Ben Li</p>
                 </div>
                 <div class="member">
-                    <span class="avatar" aria-hidden="true"></span>
-                    <div>
-                        <p class="name">Placeholder name</p>
-                        <p class="role">Placeholder role</p>
-                    </div>
+                    <p class="name">Fengwu Yu</p>
                 </div>
             </div>
         </section>
@@ -331,13 +297,13 @@
         <section>
             <h2>Data &amp; credits</h2>
             <p class="lead">
-                Placeholder — list the data sources and people behind Orion: weather, orbits, eclipses,
+                Orion stands on open data and the people who maintain it: weather, orbits, eclipses,
                 night lights, and the map.
             </p>
             <ul class="credits">
-                <li>Placeholder — source one</li>
-                <li>Placeholder — source two</li>
-                <li>Placeholder — source three</li>
+                <li>Weather and cloud-cover forecasts from public numerical weather models</li>
+                <li>Orbital elements from CelesTrak and eclipse predictions from NASA</li>
+                <li>Night-light imagery from NASA's VIIRS Black Marble; map data © OpenStreetMap contributors</li>
             </ul>
         </section>
     </main>
