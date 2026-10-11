@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Cosmos Create Account</title>
     <meta name="color-scheme" content="dark">
+    <link rel="icon" type="image/svg+xml" href="/icon.svg">
     <style>
         :root {
             --ink: #e8eef7;
@@ -549,10 +550,19 @@
     <canvas id="stars" aria-hidden="true"></canvas>
 
     <button id="logo" aria-label="Toggle menu" aria-expanded="false" aria-controls="menu">
-        <svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <circle cx="30" cy="30" r="9" fill="currentColor" stroke="none" />
-            <ellipse cx="30" cy="30" rx="22" ry="8" transform="rotate(-25 30 30)" />
-            <circle cx="48" cy="21" r="2.5" fill="currentColor" stroke="none" />
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <g transform="translate(-1.4 1.4)">
+                <g transform="translate(3 -3) rotate(-45 24 40)">
+                    <path d="M24 20 C 38 26 38 54 24 60" />
+                    <path d="M24 20 L24 60" />
+                </g>
+                <g transform="rotate(-45 24 40)">
+                    <path d="M12 40 H58" />
+                    <path d="M18 35 L12 40 L18 45" />
+                    <path d="M49 35 L58 40 L49 45 Z" fill="currentColor" stroke="none" />
+                </g>
+                <path d="M52 7 L53.4 10.6 L57 12 L53.4 13.4 L52 17 L50.6 13.4 L47 12 L50.6 10.6 Z" fill="#fbbf24" stroke="none" />
+            </g>
         </svg>
     </button>
 
