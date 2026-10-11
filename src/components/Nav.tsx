@@ -13,7 +13,9 @@ export function Nav() {
           <Link href="/map" className="hover:text-white">
             Map
           </Link>
-          {/* TODO(landing owner): add About once that page exists */}
+          <Link href="/about" className="hover:text-white">
+            About
+          </Link>
         </div>
       </nav>
     </header>
