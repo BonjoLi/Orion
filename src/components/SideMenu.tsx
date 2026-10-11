@@ -8,8 +8,19 @@ import styles from "@/components/SideMenu.module.css";
 
 // Ported from the Flask landing page (Orion/landing/templates/index.html).
 // Sidebar expands on hover/focus; the logo button pins it open for touch and keyboard users.
-// Database / Live / Account / About are placeholders until those pages exist.
-const ITEMS = [
+// Account is served by the Flask backend (next.config.ts forwards /login, /sign-up and /profile),
+// so it is a plain <a> that loads the whole page. Database and Live don't exist yet.
+type Item = {
+  label: string;
+  href: string;
+  icon: React.ReactNode;
+  /** Served by Flask: needs a full page load, and counts as current on these paths too. */
+  flask?: string[];
+  /** Not built yet: shown dimmed and not clickable. */
+  soon?: boolean;
+};
+
+const ITEMS: Item[] = [
   {
     label: "Home",
     href: "/",
@@ -34,6 +45,7 @@ const ITEMS = [
   {
     label: "Database",
     href: "#database",
+    soon: true,
     icon: (
       <>
         <ellipse cx="12" cy="5.5" rx="8.5" ry="3" />
@@ -45,6 +57,7 @@ const ITEMS = [
   {
     label: "Live",
     href: "#live",
+    soon: true,
     icon: (
       <>
         <circle className={styles.fill} cx="12" cy="12" r="2.2" />
@@ -55,7 +68,8 @@ const ITEMS = [
   },
   {
     label: "Account",
-    href: "#account",
+    href: "/profile",
+    flask: ["/profile", "/login", "/sign-up"],
     icon: (
       <>
         <circle cx="12" cy="7.5" r="4" />
@@ -65,7 +79,7 @@ const ITEMS = [
   },
   {
     label: "About",
-    href: "#about",
+    href: "/about",
     icon: (
       <>
         <circle cx="12" cy="12" r="9" />
@@ -104,16 +118,35 @@ export function SideMenu() {
       <nav id="menu" className={`${styles.menu} ${open ? styles.open : ""}`} aria-label="Main menu">
         <small>Navigate</small>
         <ul className={styles.nav}>
-          {ITEMS.map((item) => (
-            <li key={item.label}>
-              <Link href={item.href} className={pathname === item.href ? styles.active : undefined}>
+          {ITEMS.map((item) => {
+            const current = item.flask ? item.flask.includes(pathname) : pathname === item.href;
+            const className = [current ? styles.active : "", item.soon ? styles.soon : ""].filter(Boolean).join(" ") || undefined;
+            const content = (
+              <>
                 <svg className={styles.ico} viewBox="0 0 24 24" aria-hidden="true">
                   {item.icon}
                 </svg>
-                <span>{item.label}</span>
-              </Link>
-            </li>
-          ))}
+                <span>{item.soon ? `${item.label} · soon` : item.label}</span>
+              </>
+            );
+            return (
+              <li key={item.label}>
+                {item.soon ? (
+                  <a href="#" className={className} aria-disabled="true" tabIndex={-1} title="Coming soon" onClick={(e) => e.preventDefault()}>
+                    {content}
+                  </a>
+                ) : item.flask ? (
+                  <a href={item.href} className={className} aria-current={current ? "page" : undefined}>
+                    {content}
+                  </a>
+                ) : (
+                  <Link href={item.href} className={className} aria-current={current ? "page" : undefined}>
+                    {content}
+                  </Link>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </>

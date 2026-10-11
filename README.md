@@ -34,6 +34,22 @@ npm run build                  # must pass before pushing
 
 Without `ANTHROPIC_API_KEY` everything works; `/api/plan` returns a deterministic template plan with confidence 0.
 
+### Login (Flask backend)
+
+Accounts live in the Flask app (`Orion/`). Run it next to the Next.js app, in a second terminal (Python 3.10+):
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python createDB.py             # makes the tables; keeps existing accounts (add --reset to wipe them)
+python wsgi.py                 # Flask on 127.0.0.1:8080
+```
+
+Then use the site at **http://localhost:3000** (or this computer's address on your network). Next forwards
+`/login`, `/sign-up`, `/logout`, `/profile` and `/account/*` to Flask (`next.config.ts`), so the whole site is one
+address, the login cookie works on the map's host, and no link names `localhost`. The signed-in user lands on `/map`;
+the map itself stays public. Photo upload and emailed password resets show as "coming soon".
+
 ## Who works on what
 
 | Person | Owns | Files |

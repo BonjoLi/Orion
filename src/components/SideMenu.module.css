@@ -133,3 +133,10 @@ body:has(.logo:hover) .menu small {
 .nav a.active {
   background: rgba(255, 255, 255, 0.1);
 }
+
+/* Not built yet (Database, Live): dimmed and not clickable. */
+.nav a.soon {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: none;
+}

@@ -1,0 +1,51 @@
+{# Side menu shared by every Flask page. Links are paths (no host), so they work from any address. #}
+{% set ep = request.endpoint or '' %}
+<style>
+    .nav a.soon { opacity: .45; cursor: default; pointer-events: none; }
+    .flash-error { color: var(--danger, #ff8aa3); }
+    .flash-ok { color: #8fe3b0; }
+    fieldset.soon-fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+    fieldset.soon-fieldset .cta { opacity: .5; cursor: not-allowed; }
+</style>
+<ul class="nav">
+            <li><a href="/"{% if ep == 'landing.home' %} aria-current="page"{% endif %}>
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3.5 11 12 4.2 20.5 11" />
+                        <path d="M5.8 10v9.6h12.4V10" />
+                        <path d="M10.2 19.6v-4.9h3.6v4.9" />
+                    </svg>
+                    <span>Home</span></a></li>
+            <li><a href="/map">
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M2 6 8.5 3l7 3.5L22 3v14.5L15.5 21l-7-3.5L2 21Z" />
+                        <path d="M8.5 3v14.5M15.5 6.5V21" />
+                    </svg>
+                    <span>Map</span></a></li>
+            <li><a href="#" class="soon" aria-disabled="true" tabindex="-1" title="Coming soon">
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                        <ellipse cx="12" cy="5.5" rx="8.5" ry="3" />
+                        <path d="M3.5 5.5v13c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3v-13" />
+                        <path d="M3.5 12c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3" />
+                    </svg>
+                    <span>Database · soon</span></a></li>
+            <li><a href="#" class="soon" aria-disabled="true" tabindex="-1" title="Coming soon">
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle class="fill" cx="12" cy="12" r="2.2" />
+                        <path d="M7.9 7.9a5.8 5.8 0 0 0 0 8.2M16.1 7.9a5.8 5.8 0 0 1 0 8.2" />
+                        <path d="M4.8 4.8a10.2 10.2 0 0 0 0 14.4M19.2 4.8a10.2 10.2 0 0 1 0 14.4" />
+                    </svg>
+                    <span>Live · soon</span></a></li>
+            <li><a href="/profile"{% if ep.startswith('auth.') %} aria-current="page"{% endif %}>
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="7.5" r="4" />
+                        <path d="M19.5 20.5v-1a4 4 0 0 0-4-4h-7a4 4 0 0 0-4 4v1" />
+                    </svg>
+                    <span>Account</span></a></li>
+            <li><a href="/about"{% if ep == 'landing.about' %} aria-current="page"{% endif %}>
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 11.2v5.4" />
+                        <circle class="fill" cx="12" cy="7.9" r="1.2" />
+                    </svg>
+                    <span>About</span></a></li>
+        </ul>

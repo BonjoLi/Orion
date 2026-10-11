@@ -558,48 +558,7 @@
 
     <nav id="menu" aria-label="Main menu">
         <small>Navigate</small>
-        <ul class="nav">
-            <li><a href="#home">
-                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3.5 11 12 4.2 20.5 11" />
-                        <path d="M5.8 10v9.6h12.4V10" />
-                        <path d="M10.2 19.6v-4.9h3.6v4.9" />
-                    </svg>
-                    <span>Home</span></a></li>
-            <li><a href="#map">
-                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M2 6 8.5 3l7 3.5L22 3v14.5L15.5 21l-7-3.5L2 21Z" />
-                        <path d="M8.5 3v14.5M15.5 6.5V21" />
-                    </svg>
-                    <span>Map</span></a></li>
-            <li><a href="#database">
-                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                        <ellipse cx="12" cy="5.5" rx="8.5" ry="3" />
-                        <path d="M3.5 5.5v13c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3v-13" />
-                        <path d="M3.5 12c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3" />
-                    </svg>
-                    <span>Database</span></a></li>
-            <li><a href="#live">
-                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle class="fill" cx="12" cy="12" r="2.2" />
-                        <path d="M7.9 7.9a5.8 5.8 0 0 0 0 8.2M16.1 7.9a5.8 5.8 0 0 1 0 8.2" />
-                        <path d="M4.8 4.8a10.2 10.2 0 0 0 0 14.4M19.2 4.8a10.2 10.2 0 0 1 0 14.4" />
-                    </svg>
-                    <span>Live</span></a></li>
-            <li><a href="#account" aria-current="page">
-                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="7.5" r="4" />
-                        <path d="M19.5 20.5v-1a4 4 0 0 0-4-4h-7a4 4 0 0 0-4 4v1" />
-                    </svg>
-                    <span>Account</span></a></li>
-            <li><a href="#about">
-                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9" />
-                        <path d="M12 11.2v5.4" />
-                        <circle class="fill" cx="12" cy="7.9" r="1.2" />
-                    </svg>
-                    <span>About</span></a></li>
-        </ul>
+        {% include "_menu.html" %}
     </nav>
 
     <h1>Join the Expedition, Stargazer</h1>
@@ -609,11 +568,11 @@
             <div class="wordmark">ORION</div>
             <p class="tagline">Create your account</p>
 
-            <form id="signupForm" novalidate>
+            <form id="signupForm" method="post" action="{{ url_for('auth.sign_up') }}" novalidate>
                 <div class="field" id="userField">
                     <label for="username">Username</label>
                     <div class="input-wrap">
-                        <input type="text" id="username" name="username" placeholder="stargazer_42" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="20">
+                        <input type="text" id="username" name="username" value="{{ form.get('username', '') }}" placeholder="stargazer_42" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="20">
                     </div>
                     <div class="error" id="userError" role="alert">3–20 characters: letters, numbers, or underscores.</div>
                 </div>
@@ -621,7 +580,7 @@
                 <div class="field" id="emailField">
                     <label for="email">Email</label>
                     <div class="input-wrap">
-                        <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                        <input type="email" id="email" name="email" value="{{ form.get('email', '') }}" placeholder="you@example.com" autocomplete="email" required>
                     </div>
                     <div class="error" id="emailError" role="alert">Enter a valid email address.</div>
                 </div>
@@ -647,7 +606,7 @@
                 <div class="field" id="confirmField">
                     <label for="confirm">Confirm password</label>
                     <div class="input-wrap">
-                        <input type="password" id="confirm" name="confirm" placeholder="Re-enter your password" autocomplete="new-password" required>
+                        <input type="password" id="confirm" name="confirm_password" placeholder="Re-enter your password" autocomplete="new-password" required>
                         <button type="button" class="toggle" data-target="confirm" aria-label="Show password">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12z" />
@@ -664,10 +623,10 @@
                     </svg>
                     <span id="btnLabel">Create Account</span>
                 </button>
-                <div class="status" id="status" role="status" aria-live="polite"></div>
+                {% include "_flash.html" %}
             </form>
 
-            <p class="signup">Already have an account? <a href="login.html" class="link">Sign in</a></p>
+            <p class="signup">Already have an account? <a href="/login" class="link">Sign in</a></p>
         </div>
     </main>
 
@@ -801,14 +760,11 @@
             status.textContent = '';
             if (firstBad) { firstBad.focus(); return; }
 
-            // Demo only: replace this with a real request to your registration backend.
+            // The checks passed: send the form to the server (POST /sign-up).
             btn.disabled = true;
             btnLabel.textContent = 'Creating account…';
-            setTimeout(() => {
-                btn.disabled = false;
-                btnLabel.textContent = 'Create Account';
-                status.textContent = 'Demo only: connect this form to your backend to register.';
-            }, 1400);
+            addEventListener('pageshow', () => { btn.disabled = false; btnLabel.textContent = 'Create Account'; }, { once: true });
+            form.submit();
         });
     </script>
 </body>

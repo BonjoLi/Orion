@@ -641,48 +641,7 @@
 
     <nav id="menu" aria-label="Main menu">
         <small>Navigate</small>
-        <ul class="nav">
-            <li><a href="#home">
-                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3.5 11 12 4.2 20.5 11" />
-                        <path d="M5.8 10v9.6h12.4V10" />
-                        <path d="M10.2 19.6v-4.9h3.6v4.9" />
-                    </svg>
-                    <span>Home</span></a></li>
-            <li><a href="#map">
-                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M2 6 8.5 3l7 3.5L22 3v14.5L15.5 21l-7-3.5L2 21Z" />
-                        <path d="M8.5 3v14.5M15.5 6.5V21" />
-                    </svg>
-                    <span>Map</span></a></li>
-            <li><a href="#database">
-                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                        <ellipse cx="12" cy="5.5" rx="8.5" ry="3" />
-                        <path d="M3.5 5.5v13c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3v-13" />
-                        <path d="M3.5 12c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3" />
-                    </svg>
-                    <span>Database</span></a></li>
-            <li><a href="#live">
-                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle class="fill" cx="12" cy="12" r="2.2" />
-                        <path d="M7.9 7.9a5.8 5.8 0 0 0 0 8.2M16.1 7.9a5.8 5.8 0 0 1 0 8.2" />
-                        <path d="M4.8 4.8a10.2 10.2 0 0 0 0 14.4M19.2 4.8a10.2 10.2 0 0 1 0 14.4" />
-                    </svg>
-                    <span>Live</span></a></li>
-            <li><a href="#account" aria-current="page">
-                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="7.5" r="4" />
-                        <path d="M19.5 20.5v-1a4 4 0 0 0-4-4h-7a4 4 0 0 0-4 4v1" />
-                    </svg>
-                    <span>Account</span></a></li>
-            <li><a href="#about">
-                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9" />
-                        <path d="M12 11.2v5.4" />
-                        <circle class="fill" cx="12" cy="7.9" r="1.2" />
-                    </svg>
-                    <span>About</span></a></li>
-        </ul>
+        {% include "_menu.html" %}
     </nav>
 
     <h1>Your Account</h1>
@@ -692,10 +651,14 @@
             <div class="wordmark">ORION</div>
             <p class="tagline">Account settings</p>
 
+            {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}
+            <p class="note" role="status">{% for category, message in messages %}<span class="{{ 'flash-error' if category == 'error' else 'flash-ok' }}">{{ message }}</span> {% endfor %}</p>
+            {% endif %}{% endwith %}
+
             <!-- Profile picture -->
             <section class="card photo" aria-labelledby="photo-title">
-                <h2 id="photo-title" class="username">stargazer_42</h2>
-                <form action="#" method="post" enctype="multipart/form-data">
+                <h2 id="photo-title" class="username">{{ user.username }}</h2>
+                <form action="#" onsubmit="return false"><fieldset disabled class="soon-fieldset">
                     <div class="avatar" aria-hidden="true">
                         <svg viewBox="0 0 24 24">
                             <circle cx="12" cy="8" r="4" />
@@ -704,14 +667,14 @@
                     </div>
                     <label class="sr" for="avatar">Choose a profile picture</label>
                     <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg, image/gif, image/webp" required>
-                    <p class="hint">JPG, PNG, GIF or WebP, up to 5 MB.</p>
+                    <p class="hint">Photo upload is coming soon.</p>
                     <button type="submit" class="cta">
                         <svg class="ico-star" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M12 1.4 14.4 8.6 21.6 11 14.4 13.4 12 20.6 9.6 13.4 2.4 11 9.6 8.6Z" />
                         </svg>
                         Save Photo
                     </button>
-                </form>
+                </fieldset></form>
             </section>
 
             <!-- Account details (read-only) -->
@@ -719,8 +682,9 @@
                 <h2 id="details-title">Account details</h2>
                 <div class="field" style="margin-bottom: 0;">
                     <label for="email">Email</label>
-                    <input type="email" id="email" value="you@example.com" readonly>
+                    <input type="email" id="email" value="{{ user.email }}" readonly>
                 </div>
+                <a class="cta" href="/logout" style="margin-top: 18px; text-decoration: none;">Log out</a>
             </section>
 
             <!-- Change password -->
@@ -736,7 +700,7 @@
                 </div>
 
                 <!-- Option 1: enter the old password -->
-                <form class="panel panel-old" action="#" method="post">
+                <form class="panel panel-old" action="{{ url_for('auth.change_password') }}" method="post">
                     <div class="field">
                         <label for="current">Current password</label>
                         <input type="password" id="current" name="current_password" placeholder="Enter current password" autocomplete="current-password" required>
@@ -758,15 +722,15 @@
                 </form>
 
                 <!-- Option 2: send a reset email -->
-                <form class="panel panel-email" action="#" method="post">
-                    <p class="note">Forgot your current password? We'll send a reset link to <strong>y••@example.com</strong>. Open it from your inbox to choose a new one.</p>
+                <form class="panel panel-email" action="#" onsubmit="return false"><fieldset disabled class="soon-fieldset">
+                    <p class="note">Reset links by email are coming soon. Until then, change your password with the current-password option.</p>
                     <button type="submit" class="cta">
                         <svg class="ico-star" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M12 1.4 14.4 8.6 21.6 11 14.4 13.4 12 20.6 9.6 13.4 2.4 11 9.6 8.6Z" />
                         </svg>
                         Send Reset Link
                     </button>
-                </form>
+                </fieldset></form>
             </section>
         </div>
     </main>
