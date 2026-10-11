@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EventsPanel } from "@/components/events/EventsPanel";
 import type { PlaceSelection } from "@/components/gmap/contracts";
-import { pathFor } from "@/components/gmap/eventPaths";
+import { pathFor, pathFromRing } from "@/components/gmap/eventPaths";
 import { blankReason, formatDayUtc, formatHourUtc, shownHour } from "@/components/gmap/heatHour";
 import { HeatLegend } from "@/components/gmap/HeatLegend";
 import { HourControls } from "@/components/gmap/HourControls";
@@ -67,7 +67,7 @@ export function MapScreen() {
   const heat = useHeatScore(selectedId, origin, heatOn);
   const heatActive = heatOn && selectedId !== null && origin !== undefined;
   const selectedEvent = data.events.find((e) => e.id === selectedId);
-  const path = pathFor(selectedId);
+  const path = pathFor(selectedId) ?? (selectedEvent?.footprint ? pathFromRing(selectedEvent.footprint.ring) : undefined);
 
   // Past events get Play + an hour slider; everything else shows the area's best hour.
   const score = heat.phase === "ready" ? heat.score : null;
@@ -138,6 +138,7 @@ export function MapScreen() {
           <HeatLegend
             showHeat={score !== null}
             showPath={path !== undefined}
+            pathLabel={selectedEvent?.kind === "iss_pass" ? "ISS pass footprint" : undefined}
             caption={score && hour ? legendCaption(score, selectedEvent, hour, path !== undefined) : undefined}
           />
         )}

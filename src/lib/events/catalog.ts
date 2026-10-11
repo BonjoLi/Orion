@@ -61,6 +61,8 @@ export async function listEvents(from: Date, origin?: LatLon): Promise<SkyEvent[
 const DEMO_EVENTS: SkyEvent[] = demoEvents.map((e) => SkyEvent.parse(e));
 
 export async function getEvent(id: string, origin?: LatLon): Promise<SkyEvent | undefined> {
-  const all = await listEvents(new Date(0), origin);
+  // Use "now" (not the epoch) so ISS passes are computed over the same window the
+  // events list used, keeping their ids stable enough to look the picked pass up.
+  const all = await listEvents(new Date(), origin);
   return all.find((e) => e.id === id);
 }

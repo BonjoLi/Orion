@@ -34,6 +34,8 @@ export const SkyEvent = z.object({
   peak: z.string().optional(),
   /** Radiant (meteor) or target (ISS/eclipse) in degrees, if positional. */
   target: z.object({ ra: z.number(), dec: z.number() }).optional(),
+  /** Where an event is visible from, as a lat/lng ring drawn on the map (e.g. an ISS pass). */
+  footprint: z.object({ ring: z.array(z.object({ lat: z.number(), lng: z.number() })) }).optional(),
   /** Zenithal hourly rate for showers. */
   zhr: z.number().optional(),
   /**

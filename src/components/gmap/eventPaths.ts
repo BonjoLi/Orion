@@ -9,15 +9,22 @@ export type EventPath = {
   bounds: Bounds;
 };
 
+function boundsOfRing(ring: { lat: number; lng: number }[]): Bounds {
+  const lats = ring.map((p) => p.lat);
+  const lngs = ring.map((p) => p.lng);
+  return { north: Math.max(...lats), south: Math.min(...lats), east: Math.max(...lngs), west: Math.min(...lngs) };
+}
+
 function fromGeoJson(feature: { geometry: { coordinates: number[][][] } }): EventPath {
   const lonLat = feature.geometry.coordinates[0];
   const ring = lonLat.map(([lng, lat]) => ({ lat, lng }));
-  const lats = ring.map((p) => p.lat);
-  const lngs = ring.map((p) => p.lng);
-  return {
-    ring,
-    bounds: { north: Math.max(...lats), south: Math.min(...lats), east: Math.max(...lngs), west: Math.min(...lngs) },
-  };
+  return { ring, bounds: boundsOfRing(ring) };
+}
+
+/** Build a drawable path from an event's footprint ring (e.g. an ISS pass). */
+export function pathFromRing(ring: { lat: number; lng: number }[]): EventPath | undefined {
+  if (ring.length < 3) return undefined;
+  return { ring, bounds: boundsOfRing(ring) };
 }
 
 const PATHS: Record<string, EventPath> = {

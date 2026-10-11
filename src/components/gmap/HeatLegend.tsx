@@ -9,13 +9,15 @@ const GRADIENT = `linear-gradient(to right, ${HEAT_COLORS.map(
 type Props = {
   /** Show the colour scale (the heatmap is drawn). */
   showHeat?: boolean;
-  /** Show the blue "path of totality" key (an event path is drawn). */
+  /** Show the blue visibility-zone key (an event path is drawn). */
   showPath?: boolean;
+  /** Label for the zone (defaults to the eclipse's "Path of totality"). */
+  pathLabel?: string;
   caption?: string;
 };
 
 /** Bottom-left key. Higher is better for the heatmap, unlike light-pollution maps. */
-export function HeatLegend({ showHeat = false, showPath = false, caption }: Props) {
+export function HeatLegend({ showHeat = false, showPath = false, pathLabel, caption }: Props) {
   return (
     <div
       role="img"
@@ -25,7 +27,7 @@ export function HeatLegend({ showHeat = false, showPath = false, caption }: Prop
       {showPath && (
         <div className="flex items-center gap-2">
           <span className="h-3 w-5 rounded-sm border border-blue-400 bg-blue-900/70" aria-hidden="true" />
-          <span>Path of totality</span>
+          <span>{pathLabel ?? "Path of totality"}</span>
         </div>
       )}
       {showHeat && (

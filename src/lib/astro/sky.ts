@@ -34,3 +34,13 @@ export function moonIllumination(at: Date): number {
 export function altitudeOf(p: LatLon, at: Date, raHours: number, decDeg: number): number {
   return Horizon(at, observer(p), raHours, decDeg, "normal").altitude;
 }
+
+/**
+ * Right ascension (sidereal hours) and declination (degrees) of a Solar-System
+ * body at `at`, of-date. Uses an observer at the equator/prime meridian, which is
+ * geocentric to within arcseconds of parallax, so the exact location doesn't matter.
+ */
+export function bodyRaDec(body: Body, at: Date): { ra: number; dec: number } {
+  const eq = Equator(body, at, new Observer(0, 0, 0), true, true);
+  return { ra: eq.ra, dec: eq.dec };
+}

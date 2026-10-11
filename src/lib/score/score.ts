@@ -29,15 +29,18 @@ export const WEIGHTS = {
   cloudLow: 1.0,
   cloudMid: 0.8,
   cloudHigh: 0.5,
-  /** Sun altitude thresholds (deg): astronomical / nautical twilight. */
+  /** Sun altitude thresholds (deg): astronomical / nautical / civil twilight. */
   astroTwilight: -18,
   nauticalTwilight: -12,
+  civilTwilight: -6,
   /** Moon penalty ramps from 0 at moonAlt=-5° to full at +25°. */
   moonAltFloor: -5,
   moonAltRamp: 30,
   /** Target (radiant/ISS) usefulness ramps from 10° to 30° altitude. */
   targetAltFloor: 10,
   targetAltRamp: 20,
+  /** Planets are low, bright objects: "well placed" by 15° altitude. */
+  planetAltRamp: 15,
 } as const;
 
 export function clamp01(x: number): number {
@@ -72,10 +75,17 @@ export function scoreHour(
   let targetUp = event.kind === "solar_eclipse" ? pathFactor : 1;
   if (event.target) {
     targetAlt = altitudeOf(p, at, event.target.ra, event.target.dec);
-    targetUp = clamp01((targetAlt - WEIGHTS.targetAltFloor) / WEIGHTS.targetAltRamp);
+    // Planets (Mercury/Venus at elongation) are low twilight objects: they count as
+    // "well placed" much sooner than a meteor radiant does.
+    targetUp = event.kind === "planet"
+      ? clamp01(targetAlt / WEIGHTS.planetAltRamp)
+      : clamp01((targetAlt - WEIGHTS.targetAltFloor) / WEIGHTS.targetAltRamp);
   }
   // Solar eclipses happen in daylight: darkness is irrelevant, path membership is everything.
-  const darkTerm = event.kind === "solar_eclipse" ? 1 : dark;
+  // Planets are bright enough to show in twilight: ramp from 0 at sunset to 1 at the
+  // end of civil twilight instead of demanding full astronomical darkness.
+  const planetDark = clamp01(-sunAlt / -WEIGHTS.civilTwilight);
+  const darkTerm = event.kind === "solar_eclipse" ? 1 : event.kind === "planet" ? planetDark : dark;
   const moonTerm = event.kind === "solar_eclipse" ? 1 : 1 - moonPenalty;
 
   const raw = w.precipitation > 0 ? 0 : 100 * clear * darkTerm * moonTerm * targetUp * darkSkyFactor(cell);
