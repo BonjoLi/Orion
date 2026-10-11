@@ -153,7 +153,7 @@ export default function SocialsPage() {
               <span className="font-semibold text-sky-300">{topScore.toLocaleString()}</span> top score
             </span>
             <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-slate-200">
-              <span className="font-semibold text-rose-300">{REPLAYS.length}</span> event replays
+              <span className="font-semibold text-rose-300">{REPLAYS.length}</span> live events
             </span>
           </div>
         </section>
@@ -220,14 +220,12 @@ export default function SocialsPage() {
             {LEADERBOARD.map((entry) => (
               <li
                 key={entry.handle}
-                className={`flex items-center gap-4 px-4 py-3 ${
-                  entry.you ? "bg-sky-400/10" : ""
-                } ${entry.rank !== 1 ? "border-t border-white/5" : ""}`}
+                className={`flex items-center gap-4 px-4 py-3 ${entry.you ? "bg-sky-400/10" : ""
+                  } ${entry.rank !== 1 ? "border-t border-white/5" : ""}`}
               >
                 <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold ${
-                    MEDALS[entry.rank - 1] ?? "border-white/10 bg-white/5 text-slate-400"
-                  }`}
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-bold ${MEDALS[entry.rank - 1] ?? "border-white/10 bg-white/5 text-slate-400"
+                    }`}
                 >
                   {entry.rank}
                 </span>
