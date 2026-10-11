@@ -35,7 +35,16 @@ export const SkyEvent = z.object({
   /** Radiant (meteor) or target (ISS/eclipse) in degrees, if positional. */
   target: z.object({ ra: z.number(), dec: z.number() }).optional(),
   /** Zenithal hourly rate for showers. */
-  zhr: z.number().optional(),  description: z.string().optional(),
+  zhr: z.number().optional(),
+  /**
+   * Replays only: score with this UTC day's weather ("YYYY-MM-DD") instead of the event's
+   * own date, so a past event can be shown with recent weather.
+   */
+  weatherDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
+  description: z.string().optional(),
   source: z.string().optional(),
 });
 export type SkyEvent = z.infer<typeof SkyEvent>;
@@ -133,6 +142,8 @@ export const ScoreResponse = z.object({
   bounds: Bounds.optional(),
   /** Grid spacing in degrees that was used. */
   stepDeg: z.number().optional(),
+  /** Solar eclipses: when totality (or annularity) peaks at `origin`; absent if `origin` isn't on the path. */
+  totalityAt: z.string().optional(),
 });
 export type ScoreResponse = z.infer<typeof ScoreResponse>;
 

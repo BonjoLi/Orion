@@ -1,4 +1,4 @@
-import { cached, hourBucket, ONE_HOUR_MS } from "@/lib/cache";
+import { cacheGet, cacheSet, hourBucket, ONE_HOUR_MS } from "@/lib/cache";
 import type { LatLon } from "@/lib/types";
 
 // Open-Meteo. Free for non-commercial use, no key.
@@ -16,6 +16,7 @@ const HOURLY = ["cloud_cover_low", "cloud_cover_mid", "cloud_cover_high", "preci
 export const FORECAST_MAX_DAYS_AHEAD = 15;
 /** Locations per request, so the URL stays short. */ // tunable
 const CHUNK = 100;
+const FETCH_TIMEOUT_MS = 15_000; // tunable
 const ONE_DAY_MS = 24 * ONE_HOUR_MS;
 
 export type HourlyWeather = {
@@ -46,10 +47,29 @@ export function utcDay(d: Date): string {
 }
 
 /**
+ * Open-Meteo refused with 429, or went too slow to answer. Its own 429 message says
+ * "Please try again in one minute", so that is what callers are told.
+ * Live-seen 2026-10-10 with two heatmaps back to back.
+ */
+export class WeatherBusyError extends Error {
+  readonly retryAfterSec = 60;
+  constructor() {
+    super("Open-Meteo minutely request limit exceeded");
+  }
+}
+
+/** Points being fetched right now, so a second request for the same point waits instead of calling again. */
+const inflight = new Map<string, Promise<LocationForecast>>();
+
+/**
  * Hourly weather for many points over `startDate`..`endDate` (UTC days, inclusive).
  * Days before today come from the historical-forecast host (what the models predicted
  * back then), so past events can be replayed. Results keep the order of `points`.
- * Present/future ranges are cached per hour, past ranges for a day.
+ *
+ * Cached per grid point, not per request: grid points sit on a fixed lattice (see grid.ts),
+ * so a search next to an earlier one reuses most of its points and only fetches the new ones.
+ * Present/future ranges are cached for an hour, past ranges for a day. Points that were
+ * fetched successfully stay cached even if another chunk is refused (WeatherBusyError).
  */
 export async function fetchWeather(points: LatLon[], startDate: string, endDate: string): Promise<LocationForecast[]> {
   if (points.length === 0) return [];
@@ -57,17 +77,42 @@ export async function fetchWeather(points: LatLon[], startDate: string, endDate:
   const past = endDate < utcDay(now);
   const base = past ? HISTORY_BASE : FORECAST_BASE;
   const ttl = past ? ONE_DAY_MS : ONE_HOUR_MS;
+  const stamp = past ? "past" : hourBucket(now);
+  const keyOf = (p: LatLon) => `om:${stamp}:${startDate}:${endDate}:${p.lat},${p.lon}`;
+  const keys = points.map(keyOf);
 
-  const chunks: LatLon[][] = [];
-  for (let i = 0; i < points.length; i += CHUNK) chunks.push(points.slice(i, i + CHUNK));
+  const wanted = new Map<string, LatLon>();
+  points.forEach((p, i) => {
+    if (cacheGet<LocationForecast>(keys[i]) === undefined && !inflight.has(keys[i])) wanted.set(keys[i], p);
+  });
+  const toFetch = [...wanted.values()];
+  for (let i = 0; i < toFetch.length; i += CHUNK) {
+    const chunk = toFetch.slice(i, i + CHUNK);
+    const request = fetchChunk(base, chunk, startDate, endDate);
+    chunk.forEach((p, j) => {
+      const key = keyOf(p);
+      const forecast = request.then((list) => {
+        if (!list[j]) throw new Error("Open-Meteo returned fewer locations than asked for");
+        return cacheSet(key, list[j], ttl);
+      });
+      inflight.set(key, forecast);
+      const done = () => void inflight.delete(key);
+      forecast.then(done, done);
+    });
+  }
 
-  const results = await Promise.all(
-    chunks.map((chunk) => {
-      const key = `om:${past ? "past" : hourBucket(now)}:${startDate}:${endDate}:${chunk.map((p) => `${p.lat},${p.lon}`).join("|")}`;
-      return cached(key, ttl, () => fetchChunk(base, chunk, startDate, endDate));
+  const settled = await Promise.allSettled(
+    keys.map((key) => {
+      const hit = cacheGet<LocationForecast>(key);
+      return hit ? Promise.resolve(hit) : (inflight.get(key) ?? Promise.reject(new Error("weather point went missing")));
     }),
   );
-  return results.flat();
+  const failure = settled.find((s): s is PromiseRejectedResult => s.status === "rejected");
+  if (failure) {
+    const busy = settled.find((s) => s.status === "rejected" && s.reason instanceof WeatherBusyError);
+    throw busy && busy.status === "rejected" ? busy.reason : failure.reason;
+  }
+  return settled.map((s) => (s as PromiseFulfilledResult<LocationForecast>).value);
 }
 
 async function fetchChunk(base: string, points: LatLon[], startDate: string, endDate: string): Promise<LocationForecast[]> {
@@ -79,7 +124,19 @@ async function fetchChunk(base: string, points: LatLon[], startDate: string, end
   url.searchParams.set("end_date", endDate);
   url.searchParams.set("timezone", "UTC");
 
-  const res = await fetch(url, { next: { revalidate: 0 }, signal: AbortSignal.timeout(15_000) });
+  let res: Response;
+  try {
+    res = await fetch(url, { next: { revalidate: 0 }, signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
+  } catch (err) {
+    // Open-Meteo answers slowly (not with an error) once the minutely quota is nearly used up
+    // (seen 2026-10-10: 15 s timeouts right after two big requests), so a timeout means "busy".
+    if (err instanceof DOMException && err.name === "TimeoutError") throw new WeatherBusyError();
+    throw err;
+  }
+  if (res.status === 429) {
+    void res.body?.cancel();
+    throw new WeatherBusyError();
+  }
   if (!res.ok) throw new Error(`Open-Meteo ${res.status}: ${await res.text()}`);
   const json = (await res.json()) as OpenMeteoResponse | OpenMeteoResponse[];
   const list = Array.isArray(json) ? json : [json];

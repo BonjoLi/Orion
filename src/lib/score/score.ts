@@ -1,6 +1,6 @@
 import type { Feature, FeatureCollection, Point } from "geojson";
 import { altitudeOf, moonAltitude, moonIllumination, sunAltitude } from "@/lib/astro/sky";
-import { eclipseHour, eclipsePathFactor } from "@/lib/score/eclipse";
+import { eclipseHour, eclipsePathFactor, eclipsePeakAt } from "@/lib/score/eclipse";
 import { buildGrid } from "@/lib/score/grid";
 import type { Cell, CellScore, HourScore, LatLon, ScorePoint, ScoreResponse, SkyEvent } from "@/lib/types";
 import { FORECAST_MAX_DAYS_AHEAD, fetchWeather, utcDay } from "@/lib/weather/openMeteo";
@@ -98,13 +98,25 @@ export function scoreHour(
   };
 }
 
+/** Replay hours scored, UTC: roughly US daylight, so the slider covers the whole eclipse day. */ // tunable
+const REPLAY_FIRST_HOUR = 12;
+const REPLAY_LAST_HOUR = 23;
+
 /**
  * Hours (top of hour, UTC) to score, capped so the map stays cheap.
+ * - Replay (event has a `weatherDate`): every daylight hour of the event's day, for the slider.
  * - Solar eclipse: the one hour around the eclipse peak (clouds at 3am don't matter).
  * - Window open now: from now, so the heatmap answers "where tonight?".
- * - Window ahead, or already over (replay): from the window start.
+ * - Window ahead: from the window start.
  */
 export function scoringHours(event: SkyEvent, origin: LatLon, now = new Date(), maxHours = 48): Date[] {
+  if (event.weatherDate) {
+    const day = event.windowStart.slice(0, 10);
+    return Array.from({ length: REPLAY_LAST_HOUR - REPLAY_FIRST_HOUR + 1 }, (_, i) => {
+      const hh = String(REPLAY_FIRST_HOUR + i).padStart(2, "0");
+      return new Date(`${day}T${hh}:00:00.000Z`);
+    });
+  }
   if (event.kind === "solar_eclipse") return [eclipseHour(origin, event)];
   const windowStart = Date.parse(event.windowStart);
   const windowEnd = Date.parse(event.windowEnd);
@@ -115,24 +127,34 @@ export function scoringHours(event: SkyEvent, origin: LatLon, now = new Date(), 
   return hours;
 }
 
+/** The moment whose weather is used for `at`: same time of day on `event.weatherDate` for replays. */
+export function weatherHour(at: Date, event: SkyEvent): Date {
+  return event.weatherDate ? new Date(`${event.weatherDate}T${at.toISOString().slice(11)}`) : at;
+}
+
 export async function scoreEvent(event: SkyEvent, origin: LatLon, radiusKm: number, now = new Date()): Promise<ScoreResponse> {
   const { cells, step, bounds } = buildGrid(origin, radiusKm);
 
   const scheduled = scoringHours(event, origin, now);
   if (scheduled.length === 0) throw new Error(`event ${event.id} has no hours to score`);
   const lastDay = utcDay(new Date(now.getTime() + FORECAST_MAX_DAYS_AHEAD * DAY_MS));
-  const hours = scheduled.filter((h) => utcDay(h) <= lastDay);
+  const hours = scheduled.filter((h) => utcDay(weatherHour(h, event)) <= lastDay);
   if (hours.length === 0) {
-    throw new ForecastUnavailableError(utcDay(new Date(scheduled[0].getTime() - FORECAST_MAX_DAYS_AHEAD * DAY_MS)));
+    const first = weatherHour(scheduled[0], event);
+    throw new ForecastUnavailableError(utcDay(new Date(first.getTime() - FORECAST_MAX_DAYS_AHEAD * DAY_MS)));
   }
 
-  const forecasts = await fetchWeather(cells, utcDay(hours[0]), utcDay(hours[hours.length - 1]));
+  const forecasts = await fetchWeather(
+    cells,
+    utcDay(weatherHour(hours[0], event)),
+    utcDay(weatherHour(hours[hours.length - 1], event)),
+  );
   const pathFactors = event.kind === "solar_eclipse" ? cells.map((c) => eclipsePathFactor(c, event)) : undefined;
 
   const cellScores: CellScore[] = cells.map((cell, i) => {
     const byHour = new Map(forecasts[i]?.hourly.map((h) => [h.time, h]) ?? []);
     const hourScores = hours.map((at) => {
-      const w = byHour.get(at.toISOString()) ?? { cloudLow: 100, cloudMid: 100, cloudHigh: 100, precipitation: 0 };
+      const w = byHour.get(weatherHour(at, event).toISOString()) ?? { cloudLow: 100, cloudMid: 100, cloudHigh: 100, precipitation: 0 };
       return scoreHour(cell, event, at, w, pathFactors?.[i]);
     });
     const best = hourScores.reduce((a, b) => (b.score > a.score ? b : a), hourScores[0]);
@@ -151,6 +173,7 @@ export async function scoreEvent(event: SkyEvent, origin: LatLon, radiusKm: numb
     points: toPoints(cellScores),
     bounds,
     stepDeg: step,
+    totalityAt: event.kind === "solar_eclipse" ? eclipsePeakAt(origin, event)?.toISOString() : undefined,
   };
 }
 

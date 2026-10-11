@@ -12,3 +12,6 @@ export const KIND_LABEL: Record<EventKind, string> = {
 
 /** Demo replays of past events (src/data/demo-events.json) have ids starting `demo-`. */
 export const isDemo = (e: { id: string }) => e.id.startsWith("demo-");
+
+/** A replay is an event that is already over: it gets the hour slider and Play button. */
+export const isReplay = (e: { windowEnd: string }, now = Date.now()) => Date.parse(e.windowEnd) < now;

@@ -41,6 +41,8 @@ type Props = {
   origin?: PlaceSelection;
   /** Scored area for the selected event, drawn as a heatmap. */
   heat?: ScoreResponse | null;
+  /** ISO hour of `heat` to draw (the slider's hour for replays). */
+  heatHour?: string;
   /**
    * Radius (km) the heatmap covers around `origin`. Draws an outline ring and zooms out
    * to fit it, so the area is clear even while scores load. Unset = just the 5-mile view.
@@ -53,7 +55,7 @@ type Props = {
 };
 
 // Pannable, zoomable Google vector map. Heatmap and globe plug in here later.
-export function LocalMap({ origin, heat, coverageKm, path, children }: Props) {
+export function LocalMap({ origin, heat, heatHour, coverageKm, path, children }: Props) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const mapId = process.env.NEXT_PUBLIC_GOOGLE_MAP_ID || "DEMO_MAP_ID";
   // A searched place wins and is centred exactly (not on the snapped score grid).
@@ -103,7 +105,7 @@ export function LocalMap({ origin, heat, coverageKm, path, children }: Props) {
             clickable={false}
           />
         )}
-        {heat && <HeatOverlay score={heat} clip={path?.ring} />}
+        {heat && heatHour && <HeatOverlay score={heat} hour={heatHour} clip={path?.ring} />}
         {origin && (
           <>
             <AdvancedMarker position={{ lat: origin.lat, lng: origin.lon }} title={origin.label} />

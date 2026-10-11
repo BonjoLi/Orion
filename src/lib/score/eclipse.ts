@@ -27,9 +27,14 @@ function localEclipse(p: LatLon, event: SkyEvent): LocalEclipse | null {
  * can't be seen as the eclipse it is, whatever the weather.
  */
 export function eclipsePathFactor(p: LatLon, event: SkyEvent): number {
+  return eclipsePeakAt(p, event) ? 1 : 0;
+}
+
+/** When totality (or annularity) peaks at `p` with the Sun up, or null if `p` is off the path. */
+export function eclipsePeakAt(p: LatLon, event: SkyEvent): Date | null {
   const eclipse = localEclipse(p, event);
-  if (!eclipse || eclipse.peakAltitude <= 0) return 0;
-  return eclipse.kind === EclipseKind.Total || eclipse.kind === EclipseKind.Annular ? 1 : 0;
+  if (!eclipse || eclipse.peakAltitude <= 0) return null;
+  return eclipse.kind === EclipseKind.Total || eclipse.kind === EclipseKind.Annular ? eclipse.peak : null;
 }
 
 /**

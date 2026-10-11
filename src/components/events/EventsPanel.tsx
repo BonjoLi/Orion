@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { pathFor } from "@/components/gmap/eventPaths";
-import { bestShownScore, emptyHeatMessage } from "@/components/gmap/heatHour";
+import { bestShownScore, blankReason, formatDayUtc, formatHourUtc } from "@/components/gmap/heatHour";
 import type { HeatState } from "@/components/gmap/useHeatScore";
 import { isDemo, KIND_LABEL } from "@/lib/events/kinds";
 import type { SkyEvent } from "@/lib/types";
@@ -13,8 +13,8 @@ type Props = {
   selectedId: string | null;
   onSelect: (id: string | null) => void;
   status: "loading" | "ready" | "error";
-  /** `hasPlace`: the user has searched a location, which the heatmap needs. */
-  heat: { on: boolean; onChange: (on: boolean) => void; state: HeatState; hasPlace: boolean };
+  /** `hasPlace`: the user has searched a location, which the heatmap needs. `hour`: the hour drawn. */
+  heat: { on: boolean; onChange: (on: boolean) => void; state: HeatState; hasPlace: boolean; hour?: string };
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -36,7 +36,13 @@ function when(e: SkyEvent): string {
 }
 
 /** One line under the heatmap toggle: what the map is doing or why it is empty. */
-function heatStatus(event: SkyEvent | undefined, on: boolean, hasPlace: boolean, state: HeatState): string | null {
+function heatStatus(
+  event: SkyEvent | undefined,
+  on: boolean,
+  hasPlace: boolean,
+  state: HeatState,
+  hour: string | undefined,
+): string | null {
   if (!on) return null;
   if (!event) return "Pick an event, then search your location.";
   if (!hasPlace) return "Search your location to see the heatmap.";
@@ -44,13 +50,16 @@ function heatStatus(event: SkyEvent | undefined, on: boolean, hasPlace: boolean,
     case "loading":
       return "Scoring spots…";
     case "ready": {
-      const best = bestShownScore(state.score);
-      return best > 0
-        ? `${state.score.points.length} spots scored · best ${best}/100`
-        : emptyHeatMessage(event.kind, state.score.radiusKm, pathFor(event.id) !== undefined);
+      const shown = hour ?? state.score.hours[0];
+      const blank = blankReason(state.score, event.kind, shown, pathFor(event.id) !== undefined);
+      if (blank) return blank;
+      const replayNote = event.weatherDate ? ` · weather from ${formatDayUtc(event.weatherDate)}` : "";
+      return `${state.score.points.length} spots scored · best ${bestShownScore(state.score, shown)}/100 at ${formatHourUtc(shown)}${replayNote}`;
     }
     case "unavailable":
       return `Weather forecast available from ${shortDate(state.availableFrom)}.`;
+    case "busy":
+      return "Weather service is busy, retrying shortly…";
     case "error":
       return "Couldn’t load the heatmap. Try again.";
     default:
@@ -217,7 +226,7 @@ export function EventsPanel({ events, recommended, selectedId, onSelect, status,
             <input type="checkbox" checked={heat.on} onChange={(e) => heat.onChange(e.target.checked)} />
           </label>
           <p role="status" className="mt-1 text-xs text-slate-400">
-            {heatStatus(selected, heat.on, heat.hasPlace, heat.state)}
+            {heatStatus(selected, heat.on, heat.hasPlace, heat.state, heat.hour)}
           </p>
         </div>
       </aside>

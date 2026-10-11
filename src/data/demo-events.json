@@ -6,7 +6,8 @@
     "windowStart": "2024-04-08T17:00:00Z",
     "windowEnd": "2024-04-08T21:00:00Z",
     "peak": "2024-04-08T19:20:00Z",
-    "description": "Replay of the April 8 2024 total eclipse: totality across Texas to Maine. Search a place near the path (e.g. Rochester, NY) to see where the sky was clear. Clouds are what the weather models forecast that afternoon.",
+    "weatherDate": "2026-09-12",
+    "description": "Replay: the real April 8 2024 path of totality (Texas to Maine) with the weather of Sept 12, 2026 standing in for the day, which had rain clearing up across the Midwest. Search a place inside the blue band and press Play to watch the sky change hour by hour. The band shows at every hour, as if totality happened then.",
     "source": "https://svs.gsfc.nasa.gov/5123"
   }
 ]
