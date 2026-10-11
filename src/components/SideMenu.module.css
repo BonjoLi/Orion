@@ -140,3 +140,35 @@ body:has(.logo:hover) .menu small {
   cursor: default;
   pointer-events: none;
 }
+
+/* Light theme: the rail and its hover/active tints are tuned for a dark panel, so flip them. */
+:global([data-theme="light"]) .menu {
+  border-right-color: rgba(11, 31, 68, 0.12);
+  box-shadow: 1px 0 18px rgba(20, 50, 100, 0.08);
+}
+
+:global([data-theme="light"]) .nav a:hover {
+  background: rgba(11, 31, 68, 0.07);
+}
+
+:global([data-theme="light"]) .nav a.active {
+  background: rgba(11, 31, 68, 0.12);
+}
+
+:global([data-theme="light"]) .logo {
+  background: rgba(11, 31, 68, 0.08);
+  color: #1b2f57;
+}
+
+:global([data-theme="light"]) .logo:hover {
+  background: rgba(11, 31, 68, 0.14);
+}
+
+:global([data-theme="light"]) .logo.on {
+  background: rgba(11, 31, 68, 0.2);
+}
+
+:global([data-theme="light"]) .logo:focus-visible,
+:global([data-theme="light"]) .nav a:focus-visible {
+  outline-color: #0b1f44;
+}

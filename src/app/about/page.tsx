@@ -76,6 +76,10 @@ export default function AboutPage() {
           <li>Placeholder — source two</li>
           <li>Placeholder — source three</li>
         </ul>
+        <p className="mt-4 text-sm text-slate-400">
+          Earth imagery on the home page (daytime surface map and 2012 city-lights map): NASA Earth
+          Observatory / Visible Earth. NASA does not endorse Orion.
+        </p>
       </section>
     </div>
   );

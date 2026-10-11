@@ -117,7 +117,7 @@ export function EventsPanel({ events, recommended, selectedId, onSelect, status,
         aria-label="Astronomical events"
         aria-hidden={!open}
         inert={!open}
-        className={`fixed right-0 top-0 z-30 flex h-screen w-80 max-w-[88vw] flex-col gap-4 overflow-y-auto border-l border-white/10 bg-[var(--panel)] p-4 text-[var(--ink)] transition-transform duration-200 ${
+        className={`fixed right-0 top-0 z-30 flex h-screen w-80 max-w-[88vw] flex-col gap-4 overflow-y-auto border-l border-white/10 bg-[var(--panel)] p-4 pb-24 text-[var(--ink)] transition-transform duration-200 ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >

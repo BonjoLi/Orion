@@ -1,0 +1,150 @@
+/* The Earth's limb along the bottom of the landing page. Two complete surfaces (night, day)
+   share the same continents and are cross-faded when the theme changes. */
+
+.horizon {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  pointer-events: none;
+  --swap: 2.8s;
+}
+
+.earth {
+  --size: max(280vw, 320vh);
+  position: absolute;
+  left: 50%;
+  top: calc(100% - var(--limb));
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  transform: translateX(-50%);
+
+  --clouds:
+    radial-gradient(26vw 9vh at calc(50% + 14vw) 6vh, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(22vw 8vh at calc(50% - 2vw) 12vh, rgba(240, 248, 255, 0.16), rgba(240, 248, 255, 0) 70%),
+    radial-gradient(18vw 7vh at calc(50% + 34vw) 4vh, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 68%),
+    radial-gradient(30vw 4vh at calc(50% - 30vw) 3vh, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(14vw 3vh at calc(50% + 4vw) 17vh, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 70%);
+  --land:
+    radial-gradient(16vw 7vh at calc(50% - 18vw) 6vh, #3f8a5c, rgba(63, 138, 92, 0) 72%),
+    radial-gradient(12vw 5vh at calc(50% - 10vw) 9vh, #4a9567, rgba(74, 149, 103, 0) 70%),
+    radial-gradient(10vw 4vh at calc(50% - 24vw) 10vh, #2f7a4b, rgba(47, 122, 75, 0) 70%),
+    radial-gradient(9vw 4vh at calc(50% + 6vw) 4vh, #3d8a5b, rgba(61, 138, 91, 0) 70%),
+    radial-gradient(13vw 5vh at calc(50% + 16vw) 8vh, #357d50, rgba(53, 125, 80, 0) 70%),
+    radial-gradient(8vw 4vh at calc(50% + 26vw) 5vh, #4c8f62, rgba(76, 143, 98, 0) 70%),
+    radial-gradient(7vw 3vh at calc(50% - 15vw) 5vh, #a98d5c, rgba(169, 141, 92, 0) 66%),
+    radial-gradient(6vw 3vh at calc(50% + 9vw) 6vh, #b39a67, rgba(179, 154, 103, 0) 66%),
+    radial-gradient(6vw 2.6vh at calc(50% + 20vw) 10vh, #a1864f, rgba(161, 134, 79, 0) 66%);
+}
+
+.night {
+  background:
+    /* sunlight raking the day side */
+    radial-gradient(56vw 30vh at calc(50% + 22vw) 2vh, rgba(214, 240, 255, 0.4), rgba(130, 195, 255, 0.12) 48%, rgba(130, 195, 255, 0) 78%),
+    /* the terminator: the night side falls away */
+    radial-gradient(70vw 26vh at calc(50% - 26vw) 2vh, rgba(2, 6, 20, 0.55), rgba(2, 6, 20, 0.18) 48%, rgba(2, 6, 20, 0) 78%),
+    var(--clouds),
+    var(--land),
+    /* city lights on the dark side */
+    radial-gradient(2px 2px at calc(50% - 27vw) 7vh, rgba(255, 206, 140, 0.55), rgba(255, 206, 140, 0) 60%),
+    radial-gradient(2px 2px at calc(50% - 21vw) 12vh, rgba(255, 214, 150, 0.5), rgba(255, 214, 150, 0) 60%),
+    radial-gradient(2px 2px at calc(50% - 15vw) 17vh, rgba(255, 206, 140, 0.45), rgba(255, 206, 140, 0) 60%),
+    radial-gradient(2px 2px at calc(50% - 31vw) 14vh, rgba(255, 206, 140, 0.4), rgba(255, 206, 140, 0) 60%),
+    radial-gradient(2px 2px at calc(50% - 18vw) 5vh, rgba(255, 220, 160, 0.4), rgba(255, 220, 160, 0) 60%),
+    linear-gradient(180deg, #a6daf0 0vh, #5ba3d6 4vh, #2f6fae 9vh, #164b82 15vh, #0a2f5f 24vh, #041a3c 40vh, #020916 70vh, #01040c 110vh);
+}
+
+.day {
+  opacity: 0;
+  background:
+    /* low sun glancing off the limb */
+    radial-gradient(60vw 22vh at calc(50% + 24vw) 1vh, rgba(255, 236, 190, 0.85), rgba(255, 200, 130, 0.25) 46%, rgba(255, 200, 130, 0) 78%),
+    var(--clouds),
+    radial-gradient(40vw 7vh at calc(50% + 8vw) 5vh, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 70%),
+    var(--land),
+    linear-gradient(180deg, #d4efff 0vh, #90d0f4 4vh, #4ba8e2 9vh, #2c82c8 15vh, #1c62a6 24vh, #134784 40vh, #0c2f5f 70vh, #081f40 110vh);
+}
+
+:global([data-theme="light"]) .day {
+  opacity: 1;
+}
+
+.night,
+.day {
+  transition: opacity var(--swap) ease-in-out;
+}
+
+/* The WebGL planet: bottom 40% of the screen, fades in over the CSS planet once it has drawn. */
+.globe {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 40vh;
+  opacity: 0;
+  transition: opacity 1.4s ease-out;
+}
+
+.horizon[data-globe="on"] .globe {
+  opacity: 1;
+}
+
+/* Once the real planet is up, the CSS one only has to be a fallback. */
+.horizon[data-globe="on"] .earth {
+  opacity: 0;
+  transition-duration: 1.4s;
+}
+
+/* Thin atmosphere line hugging the limb. */
+.earth::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(150, 215, 255, 0) 99.1%, rgba(158, 220, 255, 0.6) 99.65%, rgba(150, 215, 255, 0) 100%);
+  filter: blur(2px);
+}
+
+.day::after {
+  background: radial-gradient(closest-side, rgba(255, 230, 190, 0) 99.05%, rgba(255, 244, 220, 0.9) 99.65%, rgba(255, 230, 190, 0) 100%);
+}
+
+.ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 14vh;
+  background: linear-gradient(180deg, rgba(3, 10, 26, 0) 0, rgba(3, 10, 26, 0.45) 45%, #020816 100%);
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  filter: blur(14px);
+  transition: opacity var(--swap) ease-in-out;
+}
+
+.glowNight {
+  background: radial-gradient(125% 28vh at 50% calc(100% - var(--limb)), rgba(150, 205, 255, 0.2) 0, rgba(90, 150, 240, 0.08) 40%, rgba(40, 90, 220, 0) 74%);
+}
+
+.glowDay {
+  opacity: 0;
+  background: radial-gradient(125% 30vh at 50% calc(100% - var(--limb)), rgba(255, 226, 170, 0.5) 0, rgba(255, 190, 130, 0.2) 40%, rgba(255, 190, 130, 0) 74%);
+}
+
+:global([data-theme="light"]) .glowDay {
+  opacity: 1;
+}
+
+:global([data-theme="light"]) .glowNight {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .horizon {
+    --swap: 0.4s;
+  }
+}

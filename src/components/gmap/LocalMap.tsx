@@ -7,6 +7,7 @@ import { AdvancedMarker, APIProvider, Circle, Map, Polygon, useMap } from "@vis.
 import type { PlaceSelection } from "@/components/gmap/contracts";
 import type { EventPath } from "@/components/gmap/eventPaths";
 import { HeatOverlay } from "@/components/gmap/HeatOverlay";
+import { useTheme } from "@/components/theme/theme";
 import { RADIUS_M, radiusBounds } from "@/lib/geo";
 import type { Bounds, ScoreResponse } from "@/lib/types";
 
@@ -56,6 +57,7 @@ type Props = {
 
 // Pannable, zoomable Google vector map. Heatmap and globe plug in here later.
 export function LocalMap({ origin, heat, heatHour, coverageKm, path, children }: Props) {
+  const theme = useTheme();
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const mapId = process.env.NEXT_PUBLIC_GOOGLE_MAP_ID || "DEMO_MAP_ID";
   // A searched place wins and is centred exactly (not on the snapped score grid).
@@ -82,7 +84,8 @@ export function LocalMap({ origin, heat, heatHour, coverageKm, path, children }:
       <Map
         mapId={mapId}
         renderingType="VECTOR"
-        colorScheme="DARK"
+        // The library builds a new map when this changes (Google can't switch it on a live map).
+        colorScheme={theme === "light" ? "LIGHT" : "DARK"}
         defaultCenter={PRINCETON}
         defaultZoom={4}
         minZoom={2}
@@ -97,11 +100,11 @@ export function LocalMap({ origin, heat, heatHour, coverageKm, path, children }:
         {path && (
           <Polygon
             paths={path.ring}
-            strokeColor="#60a5fa"
+            strokeColor={theme === "light" ? "#1d4ed8" : "#60a5fa"}
             strokeWeight={1.5}
-            fillColor="#1e3a8a"
+            fillColor={theme === "light" ? "#3b82f6" : "#1e3a8a"}
             // Google draws this above the heat image, so thin it out while colours show through.
-            fillOpacity={heat ? 0.3 : 0.55}
+            fillOpacity={heat ? (theme === "light" ? 0.12 : 0.3) : theme === "light" ? 0.28 : 0.55}
             clickable={false}
           />
         )}

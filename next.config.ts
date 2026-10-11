@@ -20,6 +20,10 @@ const FLASK_PATHS = [
 ];
 
 const nextConfig: NextConfig = {
+  // `next dev` only trusts `localhost`. Opened from 127.0.0.1 or a computer's Wi-Fi address,
+  // its scripts are blocked, so nothing on the page responds to clicks (the theme switch, Play, ...).
+  // Dev only; a production build ignores this. https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+  allowedDevOrigins: ["127.0.0.1", "192.168.*.*", "10.*.*.*"],
   async rewrites() {
     return {
       // beforeFiles: checked before pages, so nothing in src/app can shadow these paths.

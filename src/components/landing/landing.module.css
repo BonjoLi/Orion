@@ -1,188 +1,203 @@
+/* Landing hero. The sky and the Earth limb have their own files (sky.module.css, horizon.module.css). */
+
 .page {
   position: fixed;
   inset: 0;
   overflow: hidden;
   color: var(--ink);
   font-family: var(--sans);
-  background: linear-gradient(180deg, #04060d 0%, #070d1c 30%, #0a1530 58%, #0f2050 80%, #16336a 100%);
+  background: #02040b;
 }
 
-.stars {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
-/* Hero */
 .hero {
-    position: relative;
-    z-index: 5;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: clamp(40px, 6vh, 64px) var(--rail);
+  position: relative;
+  z-index: 5;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(40px, 6vh, 64px) calc(var(--rail) + 20px) clamp(72px, 14vh, 140px) var(--rail);
 }
 
 .wordmark {
-    font-size: clamp(30px, min(9vw, 13vh), 120px);
-    font-weight: 300;
-    line-height: 1.05;
-    letter-spacing: .18em;
-    margin-right: -.18em;
-    color: #f2f6fc;
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(2.8rem, min(13vw, 17vh), 6.5rem);
+  font-weight: 400; /* Marcellus ships one weight */
+  line-height: 1;
+  letter-spacing: 0.14em;
+  margin-right: -0.14em; /* trailing letter-space would nudge the word off-centre */
+  color: #f4f7ff;
+  text-shadow: 0 2px 28px rgba(5, 12, 40, 0.55);
+  animation: arrive 1.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s backwards;
+}
+
+/* Orion's belt: three stars on the real diagonal, the only ornament on the page. */
+.belt {
+  width: 46px;
+  height: 14px;
+  margin-top: clamp(14px, 2.4vh, 22px);
+  fill: #f4f7ff;
+  opacity: 0.85;
+  animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.55s backwards;
+}
+
+.greeting {
+  margin: clamp(10px, 1.8vh, 16px) 0 0;
+  font-family: var(--display);
+  font-size: clamp(0.9rem, 1.35vw, 1.1rem);
+  font-weight: 400;
+  letter-spacing: 0.26em;
+  margin-right: -0.26em;
+  text-transform: uppercase;
+  color: #e6edfb;
+  animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.7s backwards;
+}
+
+.lede {
+  margin: 16px 0 0;
+  max-width: 34ch;
+  font-size: clamp(1rem, 1.4vw, 1.125rem);
+  line-height: 1.6; /* light text on a dark sky reads tighter than it is, so a little extra leading */
+  letter-spacing: 0.01em;
+  color: #b9c8e4;
+  text-wrap: balance;
+  animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.85s backwards;
 }
 
 .cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: clamp(18px, 3vh, 30px);
-    padding: 12px 30px;
-    border: 1px solid rgba(143, 180, 255, .32);
-    border-radius: 999px;
-    color: #eaf1fb;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    text-decoration: none;
-    background: rgba(64, 116, 226, .14);
-    transition: background .2s ease, border-color .2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: clamp(22px, 4vh, 36px);
+  padding: 15px 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 224, 160, 0.55);
+  background: linear-gradient(180deg, #ffd072 0%, #f3a93a 100%);
+  color: #231600;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 10px 30px rgba(243, 169, 58, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, filter 0.25s ease;
+  animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) 1s backwards;
 }
 
-.cta:hover,
-.cta:focus-visible {
-    background: rgba(64, 116, 226, .26);
-    border-color: rgba(143, 180, 255, .55);
+.cta:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 14px 36px rgba(243, 169, 58, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
-.cta .ico-star {
-    width: 1.1em;
-    height: 1.1em;
-    fill: #d5e3f7;
-}
-
-.title {
-    position: absolute;
-    top: calc(24px + env(safe-area-inset-top, 0px));
-    left: 0;
-    right: 0;
-    text-align: center;
-    margin: 0;
-    font-weight: 400;
-    letter-spacing: .3em;
-    font-size: 12px;
-    text-transform: uppercase;
-    color: var(--muted);
-    pointer-events: none;
-}
-
-/* Sky */
-.sky {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.moon {
-    position: absolute;
-    top: 9vh;
-    right: 8vw;
-    width: clamp(56px, 6.8vw, 104px);
-    filter: drop-shadow(0 0 10px rgba(230, 236, 250, .22));
-}
-
-.moon svg {
-    display: block;
-    width: 100%;
-    height: auto;
-}
-
-.constellation {
-    position: absolute;
-    left: 8vw;
-    top: 10vh;
-    width: clamp(140px, 17vw, 260px);
-    height: auto;
-    opacity: .75;
-}
-
-/* Planet limb */
-.horizon {
-    position: fixed;
-    inset: 0;
-    z-index: 4;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.earth {
-    position: absolute;
-    left: 50%;
-    top: calc(100% - var(--limb));
-    width: max(280vw, 320vh);
-    height: max(280vw, 320vh);
-    border-radius: 50%;
-    transform: translateX(-50%);
-    background:
-        /* sunlight raking the day side */
-        radial-gradient(56vw 30vh at calc(50% + 22vw) 2vh, rgba(214, 240, 255, .42), rgba(130, 195, 255, .12) 48%, rgba(130, 195, 255, 0) 78%),
-        /* terminator: the night side falls away */
-        radial-gradient(70vw 26vh at calc(50% - 26vw) 2vh, rgba(2, 6, 20, .55), rgba(2, 6, 20, .18) 48%, rgba(2, 6, 20, 0) 78%),
-        /* high cloud cover */
-        radial-gradient(26vw 9vh at calc(50% + 14vw) 6vh, rgba(255, 255, 255, .18), rgba(255, 255, 255, 0) 70%),
-        radial-gradient(22vw 8vh at calc(50% - 2vw) 12vh, rgba(240, 248, 255, .14), rgba(240, 248, 255, 0) 70%),
-        radial-gradient(18vw 7vh at calc(50% + 34vw) 4vh, rgba(255, 255, 255, .14), rgba(255, 255, 255, 0) 68%),
-        /* forests and plains */
-        radial-gradient(16vw 7vh at calc(50% - 18vw) 6vh, #3f8a5c, rgba(63, 138, 92, 0) 72%),
-        radial-gradient(12vw 5vh at calc(50% - 10vw) 9vh, #4a9567, rgba(74, 149, 103, 0) 70%),
-        radial-gradient(10vw 4vh at calc(50% - 24vw) 10vh, #2f7a4b, rgba(47, 122, 75, 0) 70%),
-        radial-gradient(9vw 4vh at calc(50% + 6vw) 4vh, #3d8a5b, rgba(61, 138, 91, 0) 70%),
-        radial-gradient(13vw 5vh at calc(50% + 16vw) 8vh, #357d50, rgba(53, 125, 80, 0) 70%),
-        radial-gradient(8vw 4vh at calc(50% + 26vw) 5vh, #4c8f62, rgba(76, 143, 98, 0) 70%),
-        /* dry plains and shorelines */
-        radial-gradient(7vw 3vh at calc(50% - 15vw) 5vh, #a98d5c, rgba(169, 141, 92, 0) 66%),
-        radial-gradient(6vw 3vh at calc(50% + 9vw) 6vh, #b39a67, rgba(179, 154, 103, 0) 66%),
-        radial-gradient(6vw 2.6vh at calc(50% + 20vw) 10vh, #a1864f, rgba(161, 134, 79, 0) 66%),
-        /* faint city lights on the night side */
-        radial-gradient(2px 2px at calc(50% - 27vw) 7vh, rgba(255, 206, 140, .45), rgba(255, 206, 140, 0) 60%),
-        radial-gradient(2px 2px at calc(50% - 21vw) 12vh, rgba(255, 214, 150, .4), rgba(255, 214, 150, 0) 60%),
-        radial-gradient(2px 2px at calc(50% - 15vw) 17vh, rgba(255, 206, 140, .35), rgba(255, 206, 140, 0) 60%),
-        /* ocean, brightest at the limb */
-        linear-gradient(180deg, #a6daf0 0vh, #5ba3d6 4vh, #2f6fae 9vh, #164b82 15vh, #0a2f5f 24vh, #041a3c 40vh, #020916 70vh, #01040c 110vh);
-}
-
-.earth::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: radial-gradient(closest-side, rgba(150, 215, 255, 0) 99.1%, rgba(158, 220, 255, .55) 99.65%, rgba(150, 215, 255, 0) 100%);
-    filter: blur(2px);
-}
-
-.ground {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 14vh;
-    background: linear-gradient(180deg, rgba(3, 10, 26, 0) 0, rgba(3, 10, 26, .45) 45%, #020816 100%);
-}
-
-.atmo {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(125% 28vh at 50% calc(100% - var(--limb)), rgba(150, 205, 255, .16) 0, rgba(90, 150, 240, .07) 40%, rgba(40, 90, 220, 0) 74%);
-    filter: blur(14px);
+.cta:active {
+  transform: translateY(0);
 }
 
 .cta:focus-visible {
   outline: 2px solid #fff;
-  outline-offset: 3px;
+  outline-offset: 4px;
+}
+
+.star {
+  width: 1.15em;
+  height: 1.15em;
+  fill: currentColor;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cta:hover .star {
+  transform: rotate(72deg) scale(1.12);
+}
+
+/* ---- Light theme: dark ink on the day sky, navy button ------------------------------ */
+
+:global([data-theme="light"]) .wordmark {
+  color: #0b1f44;
+  text-shadow: 0 2px 26px rgba(255, 255, 255, 0.55);
+}
+
+:global([data-theme="light"]) .greeting {
+  color: #0b1f44;
+}
+
+:global([data-theme="light"]) .belt {
+  fill: #0b1f44;
+}
+
+:global([data-theme="light"]) .lede {
+  color: #24385c;
+}
+
+:global([data-theme="light"]) .cta {
+  border-color: rgba(11, 31, 68, 0.9);
+  background: #0b1f44;
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(11, 31, 68, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+:global([data-theme="light"]) .cta:hover {
+  box-shadow: 0 14px 34px rgba(11, 31, 68, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+:global([data-theme="light"]) .cta:focus-visible {
+  outline-color: #0b1f44;
+}
+
+.wordmark,
+.greeting,
+.lede,
+.cta {
+  transition-property: color, text-shadow, background, border-color, box-shadow, transform, filter;
+  transition-duration: 1.6s, 1.6s, 1.2s, 1.2s, 0.25s, 0.25s, 0.25s;
+}
+
+@keyframes arrive {
+  from {
+    opacity: 0;
+    letter-spacing: 0.34em;
+    filter: blur(8px);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    padding-right: 16px;
+    padding-left: calc(var(--rail) + 12px); /* the 72px side-menu rail is always on screen */
+  }
+
+  .cta {
+    padding: 14px 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmark,
+  .greeting,
+  .lede,
+  .cta {
+    animation: none;
+    transition-duration: 0.4s;
+  }
+
+  .star {
+    transition: none;
+  }
 }
