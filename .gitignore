@@ -18,6 +18,7 @@ next-env.d.ts
 .vercel
 .claude/worktrees/
 .impeccable/
+.claude/rules
 
 __pycache__/
 *.pyc
