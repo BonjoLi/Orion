@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { listEvents } from "@/lib/events/catalog";
+import { recommend } from "@/lib/events/recommend";
 
 export const dynamic = "force-dynamic";
 
 /**
  * GET /api/events?from=ISO&lat=&lon=
- * Returns upcoming SkyEvent[]. lat/lon are optional; with them, ISS passes
- * for that location are included.
+ * Returns upcoming SkyEvent[] plus `recommended`: ids of the top 5 ("soonest
+ * notable"). lat/lon are optional; with them, ISS passes for that location
+ * are included.
  */
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -16,7 +18,7 @@ export async function GET(req: Request) {
   const origin = lat && lon ? { lat: Number(lat), lon: Number(lon) } : undefined;
   try {
     const events = await listEvents(from, origin);
-    return NextResponse.json({ events });
+    return NextResponse.json({ events, recommended: recommend(events, from) });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }

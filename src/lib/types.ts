@@ -11,7 +11,15 @@ export const LatLon = z.object({
 });
 export type LatLon = z.infer<typeof LatLon>;
 
-export const EventKind = z.enum(["meteor_shower", "iss_pass", "solar_eclipse", "lunar_eclipse"]);
+export const EventKind = z.enum([
+  "meteor_shower",
+  "iss_pass",
+  "solar_eclipse",
+  "lunar_eclipse",
+  "planet",
+  "comet",
+  "occultation",
+]);
 export type EventKind = z.infer<typeof EventKind>;
 
 /** A sky event the user can pick. Times are ISO-8601 UTC. */
@@ -27,8 +35,7 @@ export const SkyEvent = z.object({
   /** Radiant (meteor) or target (ISS/eclipse) in degrees, if positional. */
   target: z.object({ ra: z.number(), dec: z.number() }).optional(),
   /** Zenithal hourly rate for showers. */
-  zhr: z.number().optional(),
-  description: z.string().optional(),
+  zhr: z.number().optional(),  description: z.string().optional(),
   source: z.string().optional(),
 });
 export type SkyEvent = z.infer<typeof SkyEvent>;

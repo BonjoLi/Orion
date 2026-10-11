@@ -6,6 +6,13 @@
   --fg: #e6e9f2;
   --muted: #8a93a8;
   --accent: #7dd3fc;
+  /* side menu + landing (ported from the Flask landing page) */
+  --ink: #e8eef7;
+  --panel: rgba(9, 14, 26, 0.94);
+  --rail: 72px;
+  --railOpen: 240px;
+  --limb: 30vh;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 html,

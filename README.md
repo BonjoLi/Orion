@@ -8,6 +8,20 @@ HackPHS 2026 · theme "Into the Skies"
 
 **Example:** Orionids peak Oct 21–22 with a bright Moon. The map goes green only after moonset, so the plan says "leave Princeton by 11 PM, drive to X, watch 2–4 AM."
 
+## Map (Google Maps)
+
+`/map` is a Google Maps page: a **3D globe** (`Map3DElement`, photorealistic) for the world view, a **search bar** (Places Autocomplete, falls back to Open-Meteo geocoding) that jumps to a place and switches to the **2D vector map** for local panning, and a **side menu** with the event picker, a **"Weather conditions" heatmap toggle**, hour slider, NASA night-lights overlay, Globe/2D switch and the AI plan.
+
+The heatmap is our own data (`/api/score`: Open-Meteo cloud layers × Sun/Moon/radiant geometry), drawn with deck.gl's `HeatmapLayer` (Google's recommended replacement for its removed heatmap; [deprecation note](https://developers.google.com/maps/deprecations#heatmap-layer-js-deprecation), [Google's deck.gl example](https://developers.google.com/maps/documentation/javascript/examples/deckgl-heatmap)). It is **regional by design**: it scores the cells in the current viewport, capped at ~25° × 20° (about the US East Coast), never the whole world. Colors run dark blue (worst) → green (best).
+
+`/map-legacy` is the original MapLibre page (no key needed), kept as a fallback.
+
+### Google key (free, no card)
+
+1. Signed into Google, open https://console.cloud.google.com/google/maps-hosted/tos?ref=https://developers.google.com/maps/ and accept the **Maps Demo Key** terms; the key is shown immediately ([docs](https://developers.google.com/maps/documentation/javascript/demo-key): "no billing information required", covers 2D/3D maps and map IDs; prototyping only).
+2. `.env.local`: `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=<key>` and `NEXT_PUBLIC_GOOGLE_MAP_ID=DEMO_MAP_ID`.
+3. Production later (still $0 under 10,000 map loads/month): Cloud console → Billing → APIs & Services → enable **Maps JavaScript API** + **Places API (New)** → Credentials → API key, restricted to your domains → Maps Management → Create map ID (JavaScript → Vector).
+
 ## Run it
 
 ```bash
@@ -25,7 +39,7 @@ Without `ANTHROPIC_API_KEY` everything works; `/api/plan` returns a deterministi
 | Person | Owns | Files |
 |---|---|---|
 | Landing | Landing page, copy, visuals, theme | `src/app/page.tsx`, `src/components/Hero.tsx`, `src/components/EventCard.tsx`, `src/components/Nav.tsx`, `src/components/Footer.tsx`, `src/app/globals.css` |
-| Map + data | Heatmap, slider, scoring, event data | `src/components/map/*`, `src/lib/score/*`, `src/lib/weather/*`, `src/lib/events/*`, `src/data/*` |
+| Map + data | Google map, heatmap, side menu, scoring, event data | `src/components/gmap/*`, `src/lib/score/*`, `src/lib/weather/*`, `src/lib/events/*`, `src/data/*` |
 | AI + ship | Plan generation, validation, deploy, Devpost | `src/lib/ai/*`, `src/app/api/*`, Vercel, README/Devpost |
 
 Grep for `TODO(` to find the spots each owner is expected to fill. The landing page only needs to keep the `href="/map"` CTA and the `listEvents()` call; everything else on it is yours.
@@ -38,17 +52,25 @@ src/
 │  ├─ layout.tsx              shell: Nav + Footer
 │  ├─ globals.css             Tailwind + MapLibre CSS + theme vars
 │  ├─ page.tsx                LANDING (landing owner)
-│  ├─ map/page.tsx            MAP page (renders MapView)
+│  ├─ map/page.tsx            MAP page (Google Maps; renders gmap/MapShell)
+│  ├─ map-legacy/page.tsx     fallback MapLibre page (no key)
 │  └─ api/
 │     ├─ events/route.ts      GET  upcoming events
-│     ├─ score/route.ts       POST heatmap scores
+│     ├─ score/route.ts       POST heatmap scores (radius or viewport mode)
+│     ├─ geocode/route.ts     GET place search fallback (Open-Meteo geocoding)
 │     └─ plan/route.ts        POST AI plan (validated)
 ├─ components/
 │  ├─ Nav.tsx Footer.tsx Hero.tsx EventCard.tsx
-│  ├─ map/MapView.tsx         client state: event, origin, radius, hour; calls the APIs; hourly refresh
-│  ├─ map/HeatMap.tsx         MapLibre map + heatmap layer + NASA night-lights toggle
-│  ├─ map/TimeSlider.tsx      scrub hours in the event window
-│  ├─ map/EventPicker.tsx     event / lat-lon / radius controls
+│  ├─ gmap/contracts.ts       props/interfaces shared by the Google-map components (change with care)
+│  ├─ gmap/MapShell.tsx       state: view (globe|local), origin, event, hour, toggles; renders the rest
+│  ├─ gmap/GlobeView.tsx      Map3DElement globe; flies to the origin
+│  ├─ gmap/LocalMap.tsx       2D vector map; fetches /api/score for the viewport (clamped to the cap)
+│  ├─ gmap/DeckGlOverlay.tsx  deck.gl GoogleMapsOverlay bridge
+│  ├─ gmap/HeatmapLayerFactory.ts  deck.gl HeatmapLayer (MEAN, blue→green, zoom-scaled radius)
+│  ├─ gmap/NightLights.tsx    NASA GIBS VIIRS ImageMapType overlay
+│  ├─ gmap/SearchBar.tsx      Places Autocomplete → /api/geocode fallback
+│  ├─ gmap/SideMenu.tsx       event picker · heatmap toggle · hour slider · night lights · globe/2D · plan
+│  ├─ map/*                   legacy MapLibre page components (/map-legacy)
 │  └─ plan/PlanCard.tsx       renders the plan + confidence
 ├─ lib/
 │  ├─ types.ts                zod schemas + TS types for everything crossing an API boundary
@@ -59,7 +81,8 @@ src/
 │  ├─ events/catalog.ts       merges showers + eclipses + ISS passes
 │  ├─ events/eclipses.ts      USNO solar-eclipse API
 │  ├─ events/iss.ts           ISS passes from CelesTrak + SGP4 (satellite.js)
-│  ├─ score/grid.ts           lat/lon cells inside the radius (≤120)
+│  ├─ score/grid.ts           lat/lon cells inside the radius (≤120; legacy page)
+│  ├─ score/bounds.ts         viewport grid: region cap, adaptive step, snapped lattice (≤200 cells)
 │  ├─ score/score.ts          THE SCORE FORMULA (WEIGHTS at top)
 │  └─ ai/
 │     ├─ client.ts            Anthropic client; MODEL = claude-sonnet-5-5
@@ -98,9 +121,13 @@ Map cell color = best hour in the event window; the slider shows any hour. The m
 
 `GET /api/events?lat=40.35&lon=-74.66` → `{ events: SkyEvent[] }`
 
-`POST /api/score` body `{ "eventId": "orionids-2026", "origin": {"lat": 40.35, "lon": -74.66}, "radiusKm": 150 }`
-→ `ScoreResponse { event, origin, radiusKm, computedAt, hours[], cells[] (sorted), geojson }`
-Each GeoJSON feature: `properties { id, score, bestHour, distanceKm, byHour {iso: score} }`.
+`POST /api/score` body `{ "eventId": "orionids-2026", "origin": {"lat": 40.35, "lon": -74.66}, "radiusKm": 150 }` (radius mode)
+or `{ "eventId", "origin", "bounds": {"north","south","east","west"} }` (viewport mode, used by the Google map)
+→ `ScoreResponse { event, origin, radiusKm, computedAt, hours[], cells[] (sorted), geojson, points[], bounds?, stepDeg? }`
+`points[]`: `{ id, lon, lat, score, bestHour, distanceKm, byHour {iso: score} }` (feeds the deck.gl heatmap).
+HTTP 413 `{ error, cap }` when `bounds` exceed the region cap (`REGION_CAP` in `src/lib/score/bounds.ts`).
+
+`GET /api/geocode?q=Princeton` → `{ results: [{ lat, lon, label, country }] }` (Open-Meteo geocoding, free, no key)
 
 `POST /api/plan` same body → `{ plan, validation {ok, attempts, violations, fallback}, score }`
 
@@ -116,7 +143,10 @@ All shapes are in `src/lib/types.ts`.
 | Meteor showers | curated from [EarthSky's guide](https://earthsky.org/astronomy-essentials/earthskys-meteor-shower-guide/); replace radiants with [IMO](https://www.imo.net/) values | — |
 | ISS orbit | [CelesTrak GP data](https://celestrak.org/NORAD/documentation/gp-data-formats.php) + [satellite.js](https://github.com/shashwatak/satellite-js) | public |
 | Sun/Moon/radiant positions | [astronomy-engine](https://www.npmjs.com/package/astronomy-engine) | MIT |
-| Basemap | [OpenFreeMap](https://openfreemap.org/) (OpenStreetMap data) | free, attribution auto |
+| Map | [Google Maps Platform](https://developers.google.com/maps/documentation/javascript) (vector map, 3D globe, Places) via [@vis.gl/react-google-maps](https://visgl.github.io/react-google-maps/) | Demo Key free; 10k loads/month free with billing |
+| Heatmap rendering | [deck.gl HeatmapLayer](https://deck.gl/docs/api-reference/aggregation-layers/heatmap-layer) on [GoogleMapsOverlay](https://deck.gl/docs/api-reference/google-maps/google-maps-overlay) | MIT |
+| Place search fallback | [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api) | free, no key |
+| Basemap (legacy page) | [OpenFreeMap](https://openfreemap.org/) (OpenStreetMap data) | free, attribution auto |
 | Night lights overlay | [NASA GIBS](https://nasa-gibs.github.io/gibs-api-docs/access-basics/) VIIRS Day/Night Band | public |
 | AI plan | Claude Sonnet 5.5 via `@anthropic-ai/sdk` | ~1¢ per plan |
 

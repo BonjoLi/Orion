@@ -1,0 +1,12 @@
+[
+  {
+    "id": "demo-eclipse-2024-04-08",
+    "kind": "solar_eclipse",
+    "name": "Total solar eclipse, Apr 8 2024 (demo)",
+    "windowStart": "2024-04-08T17:00:00Z",
+    "windowEnd": "2024-04-08T21:00:00Z",
+    "peak": "2024-04-08T19:20:00Z",
+    "description": "Replay of the April 8 2024 total eclipse: totality across Texas to Maine. Search a place near the path (e.g. Rochester, NY) to see where the sky was clear. Clouds are what the weather models forecast that afternoon.",
+    "source": "https://svs.gsfc.nasa.gov/5123"
+  }
+]

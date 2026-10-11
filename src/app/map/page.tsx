@@ -1,14 +1,12 @@
 import { Suspense } from "react";
-import { MapView } from "@/components/map/MapView";
+import { MapScreen } from "@/components/gmap/MapScreen";
 
-// MAP PAGE — the product. Client-side state lives in MapView.
-// Suspense is required because MapView reads useSearchParams() (?event=...).
+// MAP PAGE — reached from the "Map" tab in the side menu.
+// Suspense is required because MapScreen reads useSearchParams() (?event=...).
 export default function MapPage() {
   return (
-    <div className="h-[calc(100vh-4rem)]">
-      <Suspense fallback={<div className="p-6 text-sm text-slate-400">Loading map…</div>}>
-        <MapView />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div className="ml-[72px] p-6 text-sm text-slate-400">Loading map…</div>}>
+      <MapScreen />
+    </Suspense>
   );
 }

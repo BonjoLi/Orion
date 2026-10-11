@@ -1,8 +1,19 @@
 import type { Feature, FeatureCollection, Point } from "geojson";
 import { altitudeOf, moonAltitude, moonIllumination, sunAltitude } from "@/lib/astro/sky";
+import { eclipseHour, eclipsePathFactor } from "@/lib/score/eclipse";
 import { buildGrid } from "@/lib/score/grid";
 import type { Cell, CellScore, HourScore, LatLon, ScorePoint, ScoreResponse, SkyEvent } from "@/lib/types";
-import { fetchForecasts } from "@/lib/weather/openMeteo";
+import { FORECAST_MAX_DAYS_AHEAD, fetchWeather, utcDay } from "@/lib/weather/openMeteo";
+
+const HOUR_MS = 3600 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+
+/** The event starts beyond the weather forecast's reach. `availableFrom` is a UTC day. */
+export class ForecastUnavailableError extends Error {
+  constructor(public readonly availableFrom: string) {
+    super(`forecast not available until ${availableFrom}`);
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Deterministic viewing-condition score. This is the ground truth; the AI
@@ -45,6 +56,8 @@ export function scoreHour(
   event: SkyEvent,
   at: Date,
   w: { cloudLow: number; cloudMid: number; cloudHigh: number; precipitation: number },
+  /** Solar eclipses only: 1 inside the totality/annularity path, 0 outside (see eclipse.ts). */
+  pathFactor = 1,
 ): HourScore {
   const p: LatLon = { lat: cell.lat, lon: cell.lon };
   const sunAlt = sunAltitude(p, at);
@@ -56,7 +69,7 @@ export function scoreHour(
   const moonPenalty = moonIllum * clamp01((moonAlt - WEIGHTS.moonAltFloor) / WEIGHTS.moonAltRamp);
 
   let targetAlt: number | null = null;
-  let targetUp = 1;
+  let targetUp = event.kind === "solar_eclipse" ? pathFactor : 1;
   if (event.target) {
     targetAlt = altitudeOf(p, at, event.target.ra, event.target.dec);
     targetUp = clamp01((targetAlt - WEIGHTS.targetAltFloor) / WEIGHTS.targetAltRamp);
@@ -85,29 +98,42 @@ export function scoreHour(
   };
 }
 
-/** Hours (top of hour, UTC) inside the event window, capped so the map stays cheap. */
-export function windowHours(event: SkyEvent, maxHours = 48): Date[] {
-  const start = new Date(event.windowStart);
-  start.setUTCMinutes(0, 0, 0);
-  const end = new Date(event.windowEnd);
+/**
+ * Hours (top of hour, UTC) to score, capped so the map stays cheap.
+ * - Solar eclipse: the one hour around the eclipse peak (clouds at 3am don't matter).
+ * - Window open now: from now, so the heatmap answers "where tonight?".
+ * - Window ahead, or already over (replay): from the window start.
+ */
+export function scoringHours(event: SkyEvent, origin: LatLon, now = new Date(), maxHours = 48): Date[] {
+  if (event.kind === "solar_eclipse") return [eclipseHour(origin, event)];
+  const windowStart = Date.parse(event.windowStart);
+  const windowEnd = Date.parse(event.windowEnd);
+  const open = windowStart <= now.getTime() && now.getTime() <= windowEnd;
+  const from = Math.floor((open ? now.getTime() : windowStart) / HOUR_MS) * HOUR_MS;
   const hours: Date[] = [];
-  for (let t = start.getTime(); t <= end.getTime() && hours.length < maxHours; t += 3600 * 1000) {
-    hours.push(new Date(t));
-  }
+  for (let t = from; t <= windowEnd && hours.length < maxHours; t += HOUR_MS) hours.push(new Date(t));
   return hours;
 }
 
-export async function scoreEvent(event: SkyEvent, origin: LatLon, radiusKm: number): Promise<ScoreResponse> {
-  const cells = buildGrid(origin, radiusKm);
-  const hours = windowHours(event);
-  const daysAhead = Math.ceil((hours[hours.length - 1].getTime() - Date.now()) / (24 * 3600 * 1000)) + 1;
-  const forecasts = await fetchForecasts(cells, Math.min(16, Math.max(1, daysAhead)));
+export async function scoreEvent(event: SkyEvent, origin: LatLon, radiusKm: number, now = new Date()): Promise<ScoreResponse> {
+  const { cells, step, bounds } = buildGrid(origin, radiusKm);
+
+  const scheduled = scoringHours(event, origin, now);
+  if (scheduled.length === 0) throw new Error(`event ${event.id} has no hours to score`);
+  const lastDay = utcDay(new Date(now.getTime() + FORECAST_MAX_DAYS_AHEAD * DAY_MS));
+  const hours = scheduled.filter((h) => utcDay(h) <= lastDay);
+  if (hours.length === 0) {
+    throw new ForecastUnavailableError(utcDay(new Date(scheduled[0].getTime() - FORECAST_MAX_DAYS_AHEAD * DAY_MS)));
+  }
+
+  const forecasts = await fetchWeather(cells, utcDay(hours[0]), utcDay(hours[hours.length - 1]));
+  const pathFactors = event.kind === "solar_eclipse" ? cells.map((c) => eclipsePathFactor(c, event)) : undefined;
 
   const cellScores: CellScore[] = cells.map((cell, i) => {
     const byHour = new Map(forecasts[i]?.hourly.map((h) => [h.time, h]) ?? []);
     const hourScores = hours.map((at) => {
       const w = byHour.get(at.toISOString()) ?? { cloudLow: 100, cloudMid: 100, cloudHigh: 100, precipitation: 0 };
-      return scoreHour(cell, event, at, w);
+      return scoreHour(cell, event, at, w, pathFactors?.[i]);
     });
     const best = hourScores.reduce((a, b) => (b.score > a.score ? b : a), hourScores[0]);
     return { cell, bestHour: best.hour, bestScore: best.score, hours: hourScores };
@@ -123,6 +149,8 @@ export async function scoreEvent(event: SkyEvent, origin: LatLon, radiusKm: numb
     cells: cellScores,
     geojson: toGeoJSON(cellScores),
     points: toPoints(cellScores),
+    bounds,
+    stepDeg: step,
   };
 }
 

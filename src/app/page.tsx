@@ -1,38 +1,29 @@
 import Link from "next/link";
-import { Hero } from "@/components/Hero";
-import { EventCard } from "@/components/EventCard";
-import { listEvents } from "@/lib/events/catalog";
+import { Horizon } from "@/components/landing/Horizon";
+import { Sky } from "@/components/landing/Sky";
+import { Starfield } from "@/components/landing/Starfield";
+import styles from "@/components/landing/landing.module.css";
 
-// LANDING PAGE — owned by the landing team.
-// This file is the only page teammates need to touch for the landing work.
-// Everything below is placeholder structure; replace freely. Keep the
-// `href="/map"` CTA and the `/api/events` data flow so the map stays wired.
-
-export const dynamic = "force-dynamic";
-
-export default async function LandingPage() {
-  const events = (await listEvents(new Date())).slice(0, 4);
-
+// LANDING PAGE — ported from the Flask landing page (Orion/landing/templates/index.html).
+// Keep the `href="/map"` CTA so the map stays one click away.
+export default function LandingPage() {
   return (
-    <div className="mx-auto max-w-6xl px-6">
-      <Hero />
+    <div className={styles.page}>
+      <Starfield />
+      <h1 className={styles.title}>Welcome, Stargazer</h1>
 
-      {/* TODO(landing owner): "How it works" — three steps: pick event → see heatmap → get plan */}
-      <section className="py-12">
-        <h2 className="text-xl font-semibold mb-6">Coming up</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {events.map((e) => (
-            <EventCard key={e.id} event={e} />
-          ))}
-        </div>
-      </section>
-
-      {/* TODO(landing owner): social proof / data credits strip (NASA, Open-Meteo, USNO, CelesTrak) */}
-      <section className="py-12 text-center">
-        <Link href="/map" className="inline-block rounded-full bg-sky-300 px-6 py-3 font-medium text-black hover:bg-sky-200">
-          Open the map
+      <main className={styles.hero}>
+        <div className={styles.wordmark}>ORION</div>
+        <Link className={styles.cta} href="/map">
+          <svg className={styles["ico-star"]} viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 1.4 14.4 8.6 21.6 11 14.4 13.4 12 20.6 9.6 13.4 2.4 11 9.6 8.6Z" />
+          </svg>
+          Get Started
         </Link>
-      </section>
+      </main>
+
+      <Sky />
+      <Horizon />
     </div>
   );
 }

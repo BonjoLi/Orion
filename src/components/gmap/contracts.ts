@@ -45,12 +45,14 @@ export type SearchBarProps = {
 export type GeocodeResult = { lat: number; lon: number; label: string; country?: string };
 export type GeocodeResponse = { results: GeocodeResult[] };
 
-/** Heatmap palette, worst → best. Proposal; tune by eye. */ // tunable
-export const HEAT_COLORS: [number, number, number][] = [
-  [10, 22, 74], // deep navy — lowest visibility
-  [30, 58, 138],
-  [37, 99, 235],
-  [14, 165, 233],
-  [34, 197, 94],
-  [134, 239, 172], // light green — best
+/**
+ * Heatmap palette, worst → best, evenly spaced over score 0–100. [r, g, b, alpha 0–1].
+ * Warm on purpose: the dark map would swallow blue/green. Low scores fade out so bad
+ * areas show the plain map. Proposal (user asked for red/orange/yellow); tune by eye.
+ */ // tunable
+export const HEAT_COLORS: [number, number, number, number][] = [
+  [153, 27, 27, 0], // transparent — nothing to see here
+  [153, 27, 27, 0.6], // dark red
+  [234, 88, 12, 0.78], // orange
+  [250, 204, 21, 0.92], // yellow — best
 ];

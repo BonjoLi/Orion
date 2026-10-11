@@ -1,12 +1,6 @@
 import Link from "next/link";
 import type { SkyEvent } from "@/lib/types";
-
-const KIND_LABEL: Record<SkyEvent["kind"], string> = {
-  meteor_shower: "Meteor shower",
-  iss_pass: "ISS pass",
-  solar_eclipse: "Solar eclipse",
-  lunar_eclipse: "Lunar eclipse",
-};
+import { KIND_LABEL } from "@/lib/events/kinds";
 
 export function EventCard({ event }: { event: SkyEvent }) {
   const when = new Date(event.peak ?? event.windowStart);
