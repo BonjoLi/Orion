@@ -9,15 +9,13 @@ import styles from "@/components/SideMenu.module.css";
 // Ported from the Flask landing page (Orion/landing/templates/index.html).
 // Sidebar expands on hover/focus; the logo button pins it open for touch and keyboard users.
 // Account is served by the Flask backend (next.config.ts forwards /login, /sign-up and /profile),
-// so it is a plain <a> that loads the whole page. Database doesn't exist yet.
+// so it is a plain <a> that loads the whole page.
 type Item = {
   label: string;
   href: string;
   icon: React.ReactNode;
   /** Served by Flask: needs a full page load, and counts as current on these paths too. */
   flask?: string[];
-  /** Not built yet: shown dimmed and not clickable. */
-  soon?: boolean;
 };
 
 const ITEMS: Item[] = [
@@ -39,18 +37,6 @@ const ITEMS: Item[] = [
       <>
         <path d="M2 6 8.5 3l7 3.5L22 3v14.5L15.5 21l-7-3.5L2 21Z" />
         <path d="M8.5 3v14.5M15.5 6.5V21" />
-      </>
-    ),
-  },
-  {
-    label: "Database",
-    href: "#database",
-    soon: true,
-    icon: (
-      <>
-        <ellipse cx="12" cy="5.5" rx="8.5" ry="3" />
-        <path d="M3.5 5.5v13c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3v-13" />
-        <path d="M3.5 12c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3" />
       </>
     ),
   },
@@ -120,22 +106,18 @@ export function SideMenu() {
         <ul className={styles.nav}>
           {ITEMS.map((item) => {
             const current = item.flask ? item.flask.includes(pathname) : pathname === item.href;
-            const className = [current ? styles.active : "", item.soon ? styles.soon : ""].filter(Boolean).join(" ") || undefined;
+            const className = current ? styles.active : undefined;
             const content = (
               <>
                 <svg className={styles.ico} viewBox="0 0 24 24" aria-hidden="true">
                   {item.icon}
                 </svg>
-                <span>{item.soon ? `${item.label} · soon` : item.label}</span>
+                <span>{item.label}</span>
               </>
             );
             return (
               <li key={item.label}>
-                {item.soon ? (
-                  <a href="#" className={className} aria-disabled="true" tabIndex={-1} title="Coming soon" onClick={(e) => e.preventDefault()}>
-                    {content}
-                  </a>
-                ) : item.flask ? (
+                {item.flask ? (
                   <a href={item.href} className={className} aria-current={current ? "page" : undefined}>
                     {content}
                   </a>
