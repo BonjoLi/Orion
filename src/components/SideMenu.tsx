@@ -9,7 +9,7 @@ import styles from "@/components/SideMenu.module.css";
 // Ported from the Flask landing page (Orion/landing/templates/index.html).
 // Sidebar expands on hover/focus; the logo button pins it open for touch and keyboard users.
 // Account is served by the Flask backend (next.config.ts forwards /login, /sign-up and /profile),
-// so it is a plain <a> that loads the whole page. Database and Live don't exist yet.
+// so it is a plain <a> that loads the whole page. Database doesn't exist yet.
 type Item = {
   label: string;
   href: string;
@@ -55,14 +55,14 @@ const ITEMS: Item[] = [
     ),
   },
   {
-    label: "Live",
-    href: "#live",
-    soon: true,
+    label: "Social",
+    href: "/socials",
     icon: (
       <>
-        <circle className={styles.fill} cx="12" cy="12" r="2.2" />
-        <path d="M7.9 7.9a5.8 5.8 0 0 0 0 8.2M16.1 7.9a5.8 5.8 0 0 1 0 8.2" />
-        <path d="M4.8 4.8a10.2 10.2 0 0 0 0 14.4M19.2 4.8a10.2 10.2 0 0 1 0 14.4" />
+        <circle cx="9" cy="8" r="3.2" />
+        <path d="M3.5 19.5v-.8a4.6 4.6 0 0 1 4.6-4.6h1.8a4.6 4.6 0 0 1 4.6 4.6v.8" />
+        <circle cx="16.5" cy="9" r="2.6" />
+        <path d="M16.5 14.2a4.2 4.2 0 0 1 4 4.2v1.1" />
       </>
     ),
   },

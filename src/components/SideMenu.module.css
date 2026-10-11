@@ -134,7 +134,7 @@ body:has(.logo:hover) .menu small {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* Not built yet (Database, Live): dimmed and not clickable. */
+/* Not built yet (Database): dimmed and not clickable. */
 .nav a.soon {
   opacity: 0.45;
   cursor: default;

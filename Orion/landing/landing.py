@@ -46,6 +46,11 @@ def map_page():
     return redirect(f"{frontend_url()}/map")
 
 
+@landing_bp.route("/socials")
+def socials():
+    return redirect(f"{frontend_url()}/socials")
+
+
 @landing_bp.route("/sign-in")
 def sign_in():
     return redirect("/login")
