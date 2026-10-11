@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Cosmos Create Account</title>
+    <meta name="color-scheme" content="dark">
+    <style>
+        :root {
+            --ink: #e8eef7;
+            --muted: #8391a7;
+            --panel: rgba(9, 14, 26, .94);
+            --rail: 72px;
+            --railOpen: 240px;
+            --limb: 30vh;
+            --danger: #ff8aa3;
+            --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            color: var(--ink);
+            font-family: var(--sans);
+            background: linear-gradient(180deg, #04060d 0%, #070d1c 30%, #0a1530 58%, #0f2050 80%, #16336a 100%);
+        }
+
+        #stars {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        /* Logo */
+        #logo {
+            position: fixed;
+            z-index: 30;
+            top: calc(14px + env(safe-area-inset-top, 0px));
+            left: 9px;
+            width: 56px;
+            height: 56px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: rgba(22, 29, 52, .8);
+            color: #c6d2e6;
+            cursor: pointer;
+            transition: background .2s ease;
+        }
+
+        #logo:hover {
+            background: rgba(32, 41, 70, .9);
+        }
+
+        #logo.on {
+            background: rgba(38, 50, 84, .95);
+        }
+
+        #logo svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        #logo:focus-visible,
+        .nav a:focus-visible,
+        .cta:focus-visible,
+        .link:focus-visible,
+        .toggle:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: 3px;
+        }
+
+        /* Sidebar */
+        #menu {
+            position: fixed;
+            z-index: 20;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: var(--rail);
+            padding: calc(82px + env(safe-area-inset-top, 0px)) 14px 24px;
+            background: var(--panel);
+            border-right: 1px solid rgba(255, 255, 255, .07);
+            overflow-x: hidden;
+            overflow-y: auto;
+            transition: width .22s ease;
+        }
+
+        #menu:hover,
+        #menu:focus-within,
+        #menu.open {
+            width: min(var(--railOpen), 78vw);
+        }
+
+        body:has(#logo:hover) #menu,
+        body:has(#logo:focus-visible) #menu {
+            width: min(var(--railOpen), 78vw);
+        }
+
+        .nav {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 4px;
+        }
+
+        .nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 12px;
+            border-radius: 8px;
+            color: var(--ink);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .nav a:hover {
+            background: rgba(255, 255, 255, .06);
+        }
+
+        .nav .ico {
+            flex: 0 0 auto;
+            width: 21px;
+            height: 21px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .nav .ico .fill {
+            fill: currentColor;
+            stroke: none;
+        }
+
+        .nav a span,
+        #menu small {
+            opacity: 0;
+            transition: opacity .15s ease;
+        }
+
+        #menu:hover .nav a span,
+        #menu:hover small,
+        #menu:focus-within .nav a span,
+        #menu:focus-within small,
+        #menu.open .nav a span,
+        #menu.open small {
+            opacity: 1;
+        }
+
+        body:has(#logo:hover) #menu .nav a span,
+        body:has(#logo:hover) #menu small {
+            opacity: 1;
+        }
+
+        #menu small {
+            display: block;
+            margin: 0 0 10px 12px;
+            color: var(--muted);
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        /* Hero / sign-up */
+        main {
+            position: relative;
+            z-index: 5;
+            height: 100%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: clamp(56px, 8vh, 84px) var(--rail) 40px;
+            text-align: center;
+        }
+
+        main > .stack {
+            margin: auto 0;
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .wordmark {
+            font-size: clamp(30px, min(7vw, 9vh), 72px);
+            font-weight: 300;
+            line-height: 1.05;
+            letter-spacing: .18em;
+            margin-right: -.18em;
+            color: #f2f6fc;
+        }
+
+        .tagline {
+            margin: 10px 0 0;
+            font-size: 12px;
+            letter-spacing: .24em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        form {
+            margin-top: clamp(20px, 3.5vh, 32px);
+            padding: 26px 24px 22px;
+            text-align: left;
+            background: rgba(9, 14, 26, .72);
+            border: 1px solid rgba(143, 180, 255, .16);
+            border-radius: 16px;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 11px;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 44px 12px 14px;
+            font: inherit;
+            font-size: 15px;
+            color: var(--ink);
+            background: rgba(4, 8, 20, .7);
+            border: 1px solid rgba(143, 180, 255, .2);
+            border-radius: 10px;
+            outline: none;
+            transition: border-color .2s ease, background .2s ease;
+        }
+
+        input::placeholder {
+            color: #55637c;
+        }
+
+        input:focus {
+            border-color: rgba(143, 180, 255, .6);
+            background: rgba(6, 12, 28, .85);
+        }
+
+        .field.invalid input {
+            border-color: var(--danger);
+        }
+
+        .error {
+            display: none;
+            margin-top: 6px;
+            font-size: 12.5px;
+            color: var(--danger);
+        }
+
+        .field.invalid .error {
+            display: block;
+        }
+
+        .toggle {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: grid;
+            place-items: center;
+            padding: 7px;
+            border: 0;
+            border-radius: 8px;
+            background: none;
+            color: var(--muted);
+            cursor: pointer;
+        }
+
+        .toggle:hover {
+            color: var(--ink);
+            background: rgba(255, 255, 255, .06);
+        }
+
+        .toggle svg {
+            width: 19px;
+            height: 19px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Password strength */
+        .meter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .bars {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+        }
+
+        .bars i {
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(143, 180, 255, .15);
+            transition: background .2s ease;
+        }
+
+        .bars[data-level="1"] i:nth-child(-n+1) { background: #ff8aa3; }
+        .bars[data-level="2"] i:nth-child(-n+2) { background: #ffc27a; }
+        .bars[data-level="3"] i:nth-child(-n+3) { background: #8fc7ff; }
+        .bars[data-level="4"] i { background: #7ee0a8; }
+
+        .meter-label {
+            min-width: 56px;
+            text-align: right;
+            font-size: 11.5px;
+            letter-spacing: .06em;
+            color: var(--muted);
+        }
+
+        .hint {
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .link {
+            color: #9fc0f5;
+            text-decoration: none;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        .cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 30px;
+            border: 1px solid rgba(143, 180, 255, .32);
+            border-radius: 999px;
+            color: #eaf1fb;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            text-decoration: none;
+            background: rgba(64, 116, 226, .14);
+            cursor: pointer;
+            transition: background .2s ease, border-color .2s ease;
+        }
+
+        .cta:hover,
+        .cta:focus-visible {
+            background: rgba(64, 116, 226, .26);
+            border-color: rgba(143, 180, 255, .55);
+        }
+
+        .cta[disabled] {
+            opacity: .7;
+            cursor: progress;
+        }
+
+        .cta .ico-star {
+            width: 1.1em;
+            height: 1.1em;
+            fill: #d5e3f7;
+        }
+
+        .status {
+            min-height: 1.3em;
+            margin-top: 12px;
+            text-align: center;
+            font-size: 12.5px;
+            color: #9fc0f5;
+        }
+
+        .signup {
+            margin: 18px 0 0;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        h1 {
+            position: absolute;
+            top: calc(24px + env(safe-area-inset-top, 0px));
+            left: 0;
+            right: 0;
+            text-align: center;
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: .3em;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--muted);
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        /* Sky */
+        .sky {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .moon {
+            position: absolute;
+            top: 9vh;
+            right: 8vw;
+            width: clamp(56px, 6.8vw, 104px);
+            filter: drop-shadow(0 0 10px rgba(230, 236, 250, .22));
+        }
+
+        .moon svg {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .constellation {
+            position: absolute;
+            left: 8vw;
+            top: 10vh;
+            width: clamp(140px, 17vw, 260px);
+            height: auto;
+            opacity: .75;
+        }
+
+        /* Planet limb */
+        .horizon {
+            position: fixed;
+            inset: 0;
+            z-index: 4;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .earth {
+            position: absolute;
+            left: 50%;
+            top: calc(100% - var(--limb));
+            width: max(280vw, 320vh);
+            height: max(280vw, 320vh);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            background:
+                /* sunlight raking the day side */
+                radial-gradient(56vw 30vh at calc(50% + 22vw) 2vh, rgba(214, 240, 255, .42), rgba(130, 195, 255, .12) 48%, rgba(130, 195, 255, 0) 78%),
+                /* terminator: the night side falls away */
+                radial-gradient(70vw 26vh at calc(50% - 26vw) 2vh, rgba(2, 6, 20, .55), rgba(2, 6, 20, .18) 48%, rgba(2, 6, 20, 0) 78%),
+                /* high cloud cover */
+                radial-gradient(26vw 9vh at calc(50% + 14vw) 6vh, rgba(255, 255, 255, .18), rgba(255, 255, 255, 0) 70%),
+                radial-gradient(22vw 8vh at calc(50% - 2vw) 12vh, rgba(240, 248, 255, .14), rgba(240, 248, 255, 0) 70%),
+                radial-gradient(18vw 7vh at calc(50% + 34vw) 4vh, rgba(255, 255, 255, .14), rgba(255, 255, 255, 0) 68%),
+                /* forests and plains */
+                radial-gradient(16vw 7vh at calc(50% - 18vw) 6vh, #3f8a5c, rgba(63, 138, 92, 0) 72%),
+                radial-gradient(12vw 5vh at calc(50% - 10vw) 9vh, #4a9567, rgba(74, 149, 103, 0) 70%),
+                radial-gradient(10vw 4vh at calc(50% - 24vw) 10vh, #2f7a4b, rgba(47, 122, 75, 0) 70%),
+                radial-gradient(9vw 4vh at calc(50% + 6vw) 4vh, #3d8a5b, rgba(61, 138, 91, 0) 70%),
+                radial-gradient(13vw 5vh at calc(50% + 16vw) 8vh, #357d50, rgba(53, 125, 80, 0) 70%),
+                radial-gradient(8vw 4vh at calc(50% + 26vw) 5vh, #4c8f62, rgba(76, 143, 98, 0) 70%),
+                /* dry plains and shorelines */
+                radial-gradient(7vw 3vh at calc(50% - 15vw) 5vh, #a98d5c, rgba(169, 141, 92, 0) 66%),
+                radial-gradient(6vw 3vh at calc(50% + 9vw) 6vh, #b39a67, rgba(179, 154, 103, 0) 66%),
+                radial-gradient(6vw 2.6vh at calc(50% + 20vw) 10vh, #a1864f, rgba(161, 134, 79, 0) 66%),
+                /* faint city lights on the night side */
+                radial-gradient(2px 2px at calc(50% - 27vw) 7vh, rgba(255, 206, 140, .45), rgba(255, 206, 140, 0) 60%),
+                radial-gradient(2px 2px at calc(50% - 21vw) 12vh, rgba(255, 214, 150, .4), rgba(255, 214, 150, 0) 60%),
+                radial-gradient(2px 2px at calc(50% - 15vw) 17vh, rgba(255, 206, 140, .35), rgba(255, 206, 140, 0) 60%),
+                /* ocean, brightest at the limb */
+                linear-gradient(180deg, #a6daf0 0vh, #5ba3d6 4vh, #2f6fae 9vh, #164b82 15vh, #0a2f5f 24vh, #041a3c 40vh, #020916 70vh, #01040c 110vh);
+        }
+
+        .earth::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(closest-side, rgba(150, 215, 255, 0) 99.1%, rgba(158, 220, 255, .55) 99.65%, rgba(150, 215, 255, 0) 100%);
+            filter: blur(2px);
+        }
+
+        .ground {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 14vh;
+            background: linear-gradient(180deg, rgba(3, 10, 26, 0) 0, rgba(3, 10, 26, .45) 45%, #020816 100%);
+        }
+
+        .atmo {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(125% 28vh at 50% calc(100% - var(--limb)), rgba(150, 205, 255, .16) 0, rgba(90, 150, 240, .07) 40%, rgba(40, 90, 220, 0) 74%);
+            filter: blur(14px);
+        }
+
+        @media (max-width: 560px) {
+            :root { --rail: 0px; }
+            main { padding-left: 16px; padding-right: 16px; padding-top: 84px; }
+            #menu { width: 0; padding-left: 0; padding-right: 0; border-right: 0; }
+            #menu:hover, #menu:focus-within, #menu.open { width: min(var(--railOpen), 78vw); padding-left: 14px; padding-right: 14px; }
+            h1 { display: none; }
+            .constellation { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="stars" aria-hidden="true"></canvas>
+
+    <button id="logo" aria-label="Toggle menu" aria-expanded="false" aria-controls="menu">
+        <svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <circle cx="30" cy="30" r="9" fill="currentColor" stroke="none" />
+            <ellipse cx="30" cy="30" rx="22" ry="8" transform="rotate(-25 30 30)" />
+            <circle cx="48" cy="21" r="2.5" fill="currentColor" stroke="none" />
+        </svg>
+    </button>
+
+    <nav id="menu" aria-label="Main menu">
+        <small>Navigate</small>
+        <ul class="nav">
+            <li><a href="#home">
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3.5 11 12 4.2 20.5 11" />
+                        <path d="M5.8 10v9.6h12.4V10" />
+                        <path d="M10.2 19.6v-4.9h3.6v4.9" />
+                    </svg>
+                    <span>Home</span></a></li>
+            <li><a href="#map">
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M2 6 8.5 3l7 3.5L22 3v14.5L15.5 21l-7-3.5L2 21Z" />
+                        <path d="M8.5 3v14.5M15.5 6.5V21" />
+                    </svg>
+                    <span>Map</span></a></li>
+            <li><a href="#database">
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                        <ellipse cx="12" cy="5.5" rx="8.5" ry="3" />
+                        <path d="M3.5 5.5v13c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3v-13" />
+                        <path d="M3.5 12c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3" />
+                    </svg>
+                    <span>Database</span></a></li>
+            <li><a href="#live">
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle class="fill" cx="12" cy="12" r="2.2" />
+                        <path d="M7.9 7.9a5.8 5.8 0 0 0 0 8.2M16.1 7.9a5.8 5.8 0 0 1 0 8.2" />
+                        <path d="M4.8 4.8a10.2 10.2 0 0 0 0 14.4M19.2 4.8a10.2 10.2 0 0 1 0 14.4" />
+                    </svg>
+                    <span>Live</span></a></li>
+            <li><a href="#account" aria-current="page">
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="7.5" r="4" />
+                        <path d="M19.5 20.5v-1a4 4 0 0 0-4-4h-7a4 4 0 0 0-4 4v1" />
+                    </svg>
+                    <span>Account</span></a></li>
+            <li><a href="#about">
+                    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="M12 11.2v5.4" />
+                        <circle class="fill" cx="12" cy="7.9" r="1.2" />
+                    </svg>
+                    <span>About</span></a></li>
+        </ul>
+    </nav>
+
+    <h1>Join the Expedition, Stargazer</h1>
+
+    <main>
+        <div class="stack">
+            <div class="wordmark">ORION</div>
+            <p class="tagline">Create your account</p>
+
+            <form id="signupForm" novalidate>
+                <div class="field" id="userField">
+                    <label for="username">Username</label>
+                    <div class="input-wrap">
+                        <input type="text" id="username" name="username" placeholder="stargazer_42" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="20">
+                    </div>
+                    <div class="error" id="userError" role="alert">3–20 characters: letters, numbers, or underscores.</div>
+                </div>
+
+                <div class="field" id="emailField">
+                    <label for="email">Email</label>
+                    <div class="input-wrap">
+                        <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                    </div>
+                    <div class="error" id="emailError" role="alert">Enter a valid email address.</div>
+                </div>
+
+                <div class="field" id="passField">
+                    <label for="password">Password</label>
+                    <div class="input-wrap">
+                        <input type="password" id="password" name="password" placeholder="At least 8 characters" autocomplete="new-password" required minlength="8">
+                        <button type="button" class="toggle" data-target="password" aria-label="Show password">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="meter" aria-hidden="true">
+                        <div class="bars" id="bars" data-level="0"><i></i><i></i><i></i><i></i></div>
+                        <span class="meter-label" id="meterLabel"></span>
+                    </div>
+                    <div class="error" id="passError" role="alert">Password must be at least 8 characters.</div>
+                </div>
+
+                <div class="field" id="confirmField">
+                    <label for="confirm">Confirm password</label>
+                    <div class="input-wrap">
+                        <input type="password" id="confirm" name="confirm" placeholder="Re-enter your password" autocomplete="new-password" required>
+                        <button type="button" class="toggle" data-target="confirm" aria-label="Show password">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="error" id="confirmError" role="alert">Passwords don't match.</div>
+                </div>
+
+                <button type="submit" class="cta" id="submitBtn" style="margin-top: 22px;">
+                    <svg class="ico-star" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 1.4 14.4 8.6 21.6 11 14.4 13.4 12 20.6 9.6 13.4 2.4 11 9.6 8.6Z" />
+                    </svg>
+                    <span id="btnLabel">Create Account</span>
+                </button>
+                <div class="status" id="status" role="status" aria-live="polite"></div>
+            </form>
+
+            <p class="signup">Already have an account? <a href="login.html" class="link">Sign in</a></p>
+        </div>
+    </main>
+
+    <div class="sky" aria-hidden="true">
+        <svg class="constellation" viewBox="0 0 300 160">
+            <g fill="none" stroke="#a9c6ff" stroke-opacity=".35" stroke-width="1">
+                <path d="M26 40 18 92 96 86 86 34ZM96 86 146 108 198 74 246 40" />
+            </g>
+            <g fill="#eaf2ff">
+                <circle cx="26" cy="40" r="2.6" />
+                <circle cx="18" cy="92" r="2.3" />
+                <circle cx="96" cy="86" r="2.4" />
+                <circle cx="86" cy="34" r="2.2" />
+                <circle cx="146" cy="108" r="2.3" />
+                <circle cx="198" cy="74" r="2.6" />
+                <circle cx="246" cy="40" r="2.1" />
+            </g>
+        </svg>
+
+        <div class="moon">
+            <svg viewBox="0 0 120 120">
+                <defs>
+                    <radialGradient id="moonGrad" cx="35%" cy="30%">
+                        <stop offset="0" stop-color="#f4f6fb" />
+                        <stop offset="1" stop-color="#9aa4b5" />
+                    </radialGradient>
+                </defs>
+                <circle cx="60" cy="60" r="48" fill="url(#moonGrad)" />
+                <circle cx="42" cy="46" r="9" fill="#7e8797" opacity=".5" />
+                <circle cx="78" cy="68" r="12" fill="#7e8797" opacity=".45" />
+                <circle cx="52" cy="82" r="6" fill="#7e8797" opacity=".5" />
+                <circle cx="82" cy="40" r="5" fill="#7e8797" opacity=".4" />
+            </svg>
+        </div>
+    </div>
+
+    <div class="horizon" aria-hidden="true">
+        <div class="earth"></div>
+        <div class="ground"></div>
+        <div class="atmo"></div>
+    </div>
+
+    <script>
+        // Sidebar expands on hover/focus; the logo button pins it open for touch and keyboard users.
+        const logo = document.getElementById('logo'), menu = document.getElementById('menu');
+        function setMenu(open) {
+            menu.classList.toggle('open', open);
+            logo.classList.toggle('on', open);
+            logo.setAttribute('aria-expanded', open);
+        }
+        logo.addEventListener('click', () => setMenu(!menu.classList.contains('open')));
+        addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+
+        // Static starfield (drawn once, no animation).
+        const canvas = document.getElementById('stars'), ctx = canvas.getContext('2d');
+        function drawStars() {
+            const dpr = devicePixelRatio || 1;
+            canvas.width = innerWidth * dpr;
+            canvas.height = innerHeight * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+            const count = Math.min(220, Math.floor(innerWidth * innerHeight / 6000));
+            for (let i = 0; i < count; i++) {
+                ctx.globalAlpha = 0.15 + Math.random() * 0.6;
+                ctx.fillStyle = '#c9d5e8';
+                ctx.beginPath();
+                ctx.arc(Math.random() * innerWidth, Math.random() * innerHeight, Math.random() * 1.1 + 0.2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        addEventListener('resize', drawStars);
+        drawStars();
+
+        // Sign-up form behavior.
+        const $ = id => document.getElementById(id);
+        const form = $('signupForm');
+        const username = $('username'), email = $('email'), pass = $('password'), confirmPass = $('confirm');
+        const userField = $('userField'), emailField = $('emailField'), passField = $('passField'), confirmField = $('confirmField');
+        const status = $('status'), btn = $('submitBtn'), btnLabel = $('btnLabel');
+        const bars = $('bars'), meterLabel = $('meterLabel');
+
+        // Show/hide password toggles (one per password field).
+        document.querySelectorAll('.toggle').forEach(t => {
+            t.addEventListener('click', () => {
+                const input = $(t.dataset.target);
+                const show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                t.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+            });
+        });
+
+        const userOk = v => /^[A-Za-z0-9_]{3,20}$/.test(v);
+        const emailOk = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+        // Password strength: length, mixed case, digit, symbol.
+        function strength(v) {
+            if (!v) return 0;
+            let score = 0;
+            if (v.length >= 8) score++;
+            if (/[a-z]/.test(v) && /[A-Z]/.test(v)) score++;
+            if (/\d/.test(v)) score++;
+            if (/[^A-Za-z0-9]/.test(v) || v.length >= 14) score++;
+            return Math.max(1, score);
+        }
+        const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+
+        username.addEventListener('input', () => userField.classList.remove('invalid'));
+        email.addEventListener('input', () => emailField.classList.remove('invalid'));
+        pass.addEventListener('input', () => {
+            passField.classList.remove('invalid');
+            const level = strength(pass.value);
+            bars.dataset.level = level;
+            meterLabel.textContent = labels[level];
+            if (confirmPass.value) confirmField.classList.toggle('invalid', confirmPass.value !== pass.value);
+        });
+        confirmPass.addEventListener('input', () => confirmField.classList.remove('invalid'));
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            const checks = [
+                [userField, username, userOk(username.value.trim())],
+                [emailField, email, emailOk(email.value.trim())],
+                [passField, pass, pass.value.length >= 8],
+                [confirmField, confirmPass, confirmPass.value.length > 0 && confirmPass.value === pass.value]
+            ];
+            let firstBad = null;
+            checks.forEach(([field, input, ok]) => {
+                field.classList.toggle('invalid', !ok);
+                if (!ok && !firstBad) firstBad = input;
+            });
+            status.textContent = '';
+            if (firstBad) { firstBad.focus(); return; }
+
+            // Demo only: replace this with a real request to your registration backend.
+            btn.disabled = true;
+            btnLabel.textContent = 'Creating account…';
+            setTimeout(() => {
+                btn.disabled = false;
+                btnLabel.textContent = 'Create Account';
+                status.textContent = 'Demo only: connect this form to your backend to register.';
+            }, 1400);
+        });
+    </script>
+</body>
+
+</html>
